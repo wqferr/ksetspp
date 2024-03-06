@@ -6,10 +6,9 @@
 #include "ksets/k0.hpp"
 
 void writeCsv(std::string filename, const ksets::ActivationHistory& history, std::size_t len) {
-    std::vector<ksets::numeric> tail = history.tail(len);
     std::ofstream ofs(filename);
-    for (auto n : tail) {
-        ofs << n << '\n';
+    for (auto iter = history.tail(len); iter != history.end(); iter++) {
+        ofs << *iter << '\n';
     }
 }
 

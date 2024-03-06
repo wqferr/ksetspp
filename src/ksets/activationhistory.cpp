@@ -14,7 +14,3 @@ numeric ActivationHistory::get(std::size_t offset=0) const {
     std::size_t index = history.size() - offset - 1;
     return history.at(index);
 }
-
-std::vector<numeric> ActivationHistory::tail(std::size_t n) const {
-    return std::vector<numeric>(end() - n, end());
-}

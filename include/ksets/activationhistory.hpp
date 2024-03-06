@@ -15,7 +15,6 @@ namespace ksets {
 
         void put(numeric value);
         numeric get(std::size_t offset) const;
-        std::vector<numeric> tail(std::size_t n) const;
 
         auto begin() const {
             return history.begin();
@@ -23,6 +22,10 @@ namespace ksets {
 
         auto end() const {
             return history.end();
+        }
+
+        auto tail(std::size_t n) const {
+            return end() - n;
         }
     };
 }
