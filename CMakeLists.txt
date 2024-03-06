@@ -11,6 +11,7 @@ add_executable(
 )
 add_library(
     libksets
+    SHARED
     src/ksets/activationhistory.cpp
     src/ksets/k0.cpp
     src/ksets/k1.cpp
