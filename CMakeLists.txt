@@ -18,7 +18,12 @@ add_library(
 )
 target_link_libraries(main ksets)
 target_include_directories(ksets PUBLIC ./include)
+
+include(GNUInstallDirs)
 install(
-    DIRECTORY include/ksets
-    DESTINATION include
+    DIRECTORY include/ksets DESTINATION include
+)
+install(
+    TARGETS ksets
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
