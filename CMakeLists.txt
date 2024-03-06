@@ -10,7 +10,7 @@ add_executable(
     src/main.cpp
 )
 add_library(
-    libksets
+    ksets
     SHARED
     src/ksets/activationhistory.cpp
     src/ksets/k0.cpp
@@ -18,5 +18,5 @@ add_library(
     src/ksets/k2.cpp
     src/ksets/k3.cpp
 )
-target_link_libraries(main libksets)
-target_include_directories(libksets PUBLIC ./include)
+target_link_libraries(main ksets)
+target_include_directories(ksets PUBLIC ./include)
