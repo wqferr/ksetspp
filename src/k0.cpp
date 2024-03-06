@@ -4,10 +4,6 @@
 #include <tgmath.h>
 #include <cassert>
 
-#ifdef DEBUG
-#include <iostream>
-#endif
-
 using ksets::K0;
 using ksets::numeric;
 

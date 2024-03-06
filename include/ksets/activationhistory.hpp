@@ -4,7 +4,7 @@
 #include <deque>
 #include <optional>
 
-#include "ksets/config.hpp"
+#include "config.hpp"
 
 namespace ksets {
     class ActivationHistory {

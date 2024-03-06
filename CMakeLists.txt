@@ -10,11 +10,15 @@ add_executable(
 )
 add_library(
     ksets
-    src/ksets/activationhistory.cpp
-    src/ksets/k0.cpp
-    src/ksets/k1.cpp
-    src/ksets/k2.cpp
-    src/ksets/k3.cpp
+    src/activationhistory.cpp
+    src/k0.cpp
+    src/k1.cpp
+    src/k2.cpp
+    src/k3.cpp
 )
 target_link_libraries(main ksets)
 target_include_directories(ksets PUBLIC ./include)
+install(
+    DIRECTORY include/ksets
+    DESTINATION include
+)
