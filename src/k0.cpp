@@ -7,7 +7,7 @@
 using ksets::K0;
 using ksets::numeric;
 
-K0::K0(numeric learningRate): learningRate(learningRate) {}
+K0::K0(): activationHistory() {}
 
 numeric K0::calculateNetInput() {
     numeric accumulation = currentExternalStimulus;
@@ -28,12 +28,8 @@ numeric K0::getDelayedOutput(std::size_t delay) const {
     return activationHistory.get(delay);
 }
 
-void K0::hebbianReinforcementIteration() {
-    // TODO: stuff with the learning rate and hebbian learning
-}
-
-void K0::setExternalStimulus(numeric newStimulus) {
-    currentExternalStimulus = newStimulus;
+void K0::setExternalStimulus(numeric newExternalStimulus) {
+    currentExternalStimulus = newExternalStimulus;
 }
 
 numeric odeF1(numeric x, numeric dx_dt, numeric totalStimulus) {
@@ -64,6 +60,8 @@ void K0::calculateNextState() {
     nextOdeState = odeState;
     nextOdeState[0] += (k1 + 2*k2 + 2*k3 + k4) / 6;
     nextOdeState[1] += (l1 + 2*l2 + 2*l3 + l4) / 6;
+    assert(nextOdeState[0] == nextOdeState[0]);
+    assert(nextOdeState[1] == nextOdeState[1]);
 }
 
 void K0::calculateNextState(numeric newExternalStimulus) {
@@ -82,7 +80,11 @@ void K0::calculateAndCommitNextState(numeric newExternalStimulus) {
 }
 
 void K0::commitNextState() {
+    // printf("X:%f %f\n", odeState[0], odeState[1]);
+    // printf("Y:%f %f\n", nextOdeState[0], nextOdeState[1]);
     odeState = nextOdeState;
+    // printf("Z:%f %f\n", odeState[0], odeState[1]);
+    // printf("W:%f %f\n", nextOdeState[0], nextOdeState[1]);
     pushOutputToHistory();
 }
 

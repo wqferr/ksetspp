@@ -8,8 +8,6 @@
 #include "ksets/activationhistory.hpp"
 
 namespace ksets {
-    class K0;
-
     class K0 {
         struct K0Connection {
             const K0& source;
@@ -20,8 +18,7 @@ namespace ksets {
         };
 
         std::vector<K0Connection> inboundConnections;
-        numeric currentExternalStimulus;
-        numeric learningRate;
+        numeric currentExternalStimulus = 0;
 
         numeric calculateNetInput();
         void pushOutputToHistory();
@@ -35,7 +32,7 @@ namespace ksets {
         ActivationHistory activationHistory;
 
     public:
-        K0(numeric learningRate=DEFAULT_LEARN_RATE);
+        K0();
 
         void addInboundConnection(const K0& source, numeric weight, std::size_t delay);
 
@@ -43,8 +40,7 @@ namespace ksets {
         // throws exception if delay is greater than history size
         numeric getDelayedOutput(std::size_t delay) const;
 
-        void hebbianReinforcementIteration();
-        void setExternalStimulus(numeric newStimulus);
+        void setExternalStimulus(numeric newExternalStimulus);
         void calculateNextState();
         void calculateNextState(numeric newExternalStimulus);
         void commitNextState();

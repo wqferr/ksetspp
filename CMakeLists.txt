@@ -4,6 +4,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_compile_definitions(DEBUG)
+add_compile_options(-g)
 add_executable(
     main
     src/main.cpp
@@ -15,6 +16,7 @@ add_library(
     src/k1.cpp
     src/k2.cpp
     src/k3.cpp
+    src/k0collection.cpp
 )
 target_link_libraries(main ksets)
 target_include_directories(ksets PUBLIC ./include)
