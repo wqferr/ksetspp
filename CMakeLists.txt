@@ -21,7 +21,7 @@ target_include_directories(ksets PUBLIC ./include)
 
 include(GNUInstallDirs)
 install(
-    DIRECTORY include/ksets DESTINATION include
+    DIRECTORY include/ksets DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 install(
     TARGETS ksets
