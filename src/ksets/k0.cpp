@@ -4,6 +4,10 @@
 #include <tgmath.h>
 #include <cassert>
 
+#ifdef DEBUG
+#include <iostream>
+#endif
+
 using ksets::K0;
 using ksets::numeric;
 
@@ -44,7 +48,7 @@ numeric odeF1(numeric x, numeric dx_dt, numeric totalStimulus) {
 
 numeric odeF2(numeric x, numeric dx_dt, numeric totalStimulus) {
     using ksets::ODE_A_DECAY_RATE, ksets::ODE_B_RISE_RATE;
-    return (-(ODE_A_DECAY_RATE+ODE_B_RISE_RATE)*dx_dt) - (ODE_A_DECAY_RATE*ODE_B_RISE_RATE*(totalStimulus - x));
+    return (-(ODE_A_DECAY_RATE+ODE_B_RISE_RATE)*dx_dt) + (ODE_A_DECAY_RATE*ODE_B_RISE_RATE*(totalStimulus - x));
 }
 
 void K0::calculateNextState() {
@@ -71,6 +75,16 @@ void K0::calculateNextState(numeric newExternalStimulus) {
     calculateNextState();
 }
 
+void K0::calculateAndCommitNextState() {
+    calculateNextState();
+    commitNextState();
+}
+
+void K0::calculateAndCommitNextState(numeric newExternalStimulus) {
+    calculateNextState(newExternalStimulus);
+    commitNextState();
+}
+
 void K0::commitNextState() {
     odeState = nextOdeState;
     pushOutputToHistory();
@@ -78,4 +92,8 @@ void K0::commitNextState() {
 
 void K0::pushOutputToHistory() {
     activationHistory.put(ksets::sigmoid(odeState[0]));
+}
+
+const ksets::ActivationHistory& K0::getActivationHistory() const {
+    return activationHistory;
 }

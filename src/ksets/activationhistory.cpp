@@ -6,12 +6,15 @@ using ksets::numeric;
 ActivationHistory::ActivationHistory(std::size_t historySize): history(historySize, 0) {}
 
 void ActivationHistory::put(numeric value) {
-    history.pop_back();
-    // push at the front so accessing with an larger
-    // index goes backwards in time
-    history.push_front(value);
+    history.pop_front();
+    history.push_back(value);
 }
 
 numeric ActivationHistory::get(std::size_t offset=0) const {
-    return history.at(offset);
+    std::size_t index = history.size() - offset - 1;
+    return history.at(index);
+}
+
+std::vector<numeric> ActivationHistory::tail(std::size_t n) const {
+    return std::vector<numeric>(end() - n, end());
 }

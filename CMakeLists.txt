@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_FLAGS -Iinclude)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_compile_options(-Iinclude)
+add_compile_options(-DDEBUG)
 add_executable(
     main
     src/main.cpp

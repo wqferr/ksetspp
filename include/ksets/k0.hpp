@@ -10,7 +10,6 @@
 namespace ksets {
     class K0;
 
-
     class K0 {
         struct K0Connection {
             const K0& source;
@@ -31,8 +30,8 @@ namespace ksets {
         // [1] = dout_dt
         using OdeState = std::array<numeric, 2>;
 
-        OdeState odeState;
-        OdeState nextOdeState;
+        OdeState odeState = {0, 0};
+        OdeState nextOdeState = {0, 0};
         ActivationHistory activationHistory;
 
     public:
@@ -49,5 +48,9 @@ namespace ksets {
         void calculateNextState();
         void calculateNextState(numeric newExternalStimulus);
         void commitNextState();
+        void calculateAndCommitNextState();
+        void calculateAndCommitNextState(numeric newExternalStimulus);
+
+        const ActivationHistory& getActivationHistory() const;
     };
 }

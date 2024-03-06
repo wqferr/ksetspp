@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 #include <deque>
 #include <optional>
 
@@ -14,5 +15,14 @@ namespace ksets {
 
         void put(numeric value);
         numeric get(std::size_t offset) const;
+        std::vector<numeric> tail(std::size_t n) const;
+
+        auto begin() const {
+            return history.begin();
+        }
+
+        auto end() const {
+            return history.end();
+        }
     };
 }
