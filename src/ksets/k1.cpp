@@ -11,6 +11,6 @@ K1::K1(numeric wPrimarySecondary, numeric wSecondaryPrimary)
     if (copysign(1.0, wPrimarySecondary) != copysign(1.0, wSecondaryPrimary))
         throw std::invalid_argument("Weights must both be positive or both be negative");
 
-    secondaryNode().addInboundConnection(primaryNode(), wPrimarySecondary);
-    primaryNode().addInboundConnection(secondaryNode(), wSecondaryPrimary);
+    secondaryNode()->addInboundConnection(primaryNode(), wPrimarySecondary);
+    primaryNode()->addInboundConnection(secondaryNode(), wSecondaryPrimary);
 }

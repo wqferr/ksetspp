@@ -5,24 +5,49 @@
 
 using ksets::K0, ksets::K0Connection, ksets::numeric;
 
-void K0Connection::perturbWeight(numeric delta) {
+bool K0Connection::perturbWeight(numeric delta) {
     numeric newWeight = weight + delta;
     if (copysign(1.0, weight) != copysign(1.0, newWeight))
-        throw std::runtime_error("Adjusted weight flipped connection from excitatory to inhibitory or vice-versa");
+        return false;
     weight = newWeight;
+    return true;
 }
 
-K0::K0(): activationHistory() {}
+K0::K0(): activationHistory(HISTORY_SIZE) {}
+
+namespace {
+    void doCloneSubgraph(std::map<K0*, K0*>& oldToNew, K0 *current) {
+        K0 *newCurrent = new K0(*current);
+        oldToNew.insert(std::make_pair(current, newCurrent));
+        for (
+            auto connIter = current->iterInboundConnections();
+            connIter != current->endInboundConnections();
+            connIter++
+        ) {
+            K0 *other = connIter->source;
+            if (oldToNew.find(other) == oldToNew.end())
+                doCloneSubgraph(oldToNew, other);
+            K0 *newOther = oldToNew.at(newOther);
+            newCurrent->addInboundConnection(newOther, connIter->weight, connIter->delay);
+        }
+    }
+}
+
+std::map<K0*, K0*> K0::cloneSubgraph() {
+    std::map<K0*, K0*> oldToNew;
+    doCloneSubgraph(oldToNew, this);
+    return oldToNew;
+}
 
 numeric K0::calculateNetInput() {
     numeric accumulation = currentExternalStimulus;
     for (auto& connection : inboundConnections)
-        accumulation += connection.weight * connection.source.getDelayedOutput(connection.delay);
+        accumulation += connection.weight * connection.source->getDelayedOutput(connection.delay);
     return accumulation;
 }
 
-void K0::addInboundConnection(const K0& source, numeric weight, std::size_t delay) {
-    inboundConnections.emplace_back(source, *this, weight, delay);
+void K0::addInboundConnection(K0 *source, numeric weight, std::size_t delay) {
+    inboundConnections.emplace_back(source, this, weight, delay);
 }
 
 numeric K0::getCurrentOutput() const {

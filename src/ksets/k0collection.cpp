@@ -2,21 +2,30 @@
 
 using ksets::K0Collection, ksets::K0;
 
-K0& K0Collection::node(std::size_t index) {
+K0Collection::K0Collection(std::size_t nNodes) {
+    for (std::size_t i = 0; i < nNodes; i++)
+        nodes.push_back(new K0());
+}
+
+K0 *K0Collection::node(std::size_t index) {
     return nodes.at(index);
 }
 
-const K0& K0Collection::node(std::size_t index) const {
+const K0 *K0Collection::node(std::size_t index) const {
     return nodes.at(index);
+}
+
+std::size_t K0Collection::size() const {
+    return nodes.size();
 }
 
 void K0Collection::setExternalStimulus(numeric newExternalStimulus) {
-    primaryNode().setExternalStimulus(newExternalStimulus);
+    primaryNode()->setExternalStimulus(newExternalStimulus);
 }
 
 void K0Collection::calculateNextState() {
-    for (auto& node : nodes)
-        node.calculateNextState();
+    for (auto node : nodes)
+        node->calculateNextState();
 }
 
 void K0Collection::calculateNextState(numeric newExternalStimulus) {
@@ -25,8 +34,8 @@ void K0Collection::calculateNextState(numeric newExternalStimulus) {
 }
 
 void K0Collection::commitNextState() {
-    for (auto& node : nodes)
-        node.commitNextState();
+    for (auto node : nodes)
+        node->commitNextState();
 }
 
 void K0Collection::calculateAndCommitNextState() {

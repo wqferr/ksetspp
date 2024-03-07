@@ -3,7 +3,9 @@
 using ksets::ActivationHistory;
 using ksets::numeric;
 
-ActivationHistory::ActivationHistory(std::size_t historySize): history(historySize, 0) {}
+ActivationHistory::ActivationHistory(std::size_t historySize)
+    : history(historySize)
+{}
 
 void ActivationHistory::put(numeric value) {
     history.pop_front();

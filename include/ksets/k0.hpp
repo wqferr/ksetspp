@@ -3,6 +3,8 @@
 #include <vector>
 #include <utility>
 #include <array>
+#include <memory>
+#include <map>
 
 #include "ksets/config.hpp"
 #include "ksets/activationhistory.hpp"
@@ -11,19 +13,18 @@ namespace ksets {
     class K0;
 
     struct K0Connection {
-        const K0& source;
-        const K0& target;
+        K0 *source;
+        K0 *target;
         numeric weight;
         std::size_t delay;
 
-        K0Connection(const K0& source, const K0& target, numeric weight, std::size_t delay)
+        K0Connection(K0 *source, K0 *target, numeric weight, std::size_t delay)
             : source(source), target(target), weight(weight), delay(delay) {}
 
-        void perturbWeight(numeric delta);
+        bool perturbWeight(numeric delta);
     };
 
     class K0 {
-
         std::vector<K0Connection> inboundConnections;
         numeric currentExternalStimulus = 0;
 
@@ -40,11 +41,11 @@ namespace ksets {
 
     public:
         K0();
+        std::map<K0*, K0*> cloneSubgraph();
 
-        void addInboundConnection(const K0& source, numeric weight, std::size_t delay=0);
+        void addInboundConnection(K0 *source, numeric weight, std::size_t delay=0);
 
         numeric getCurrentOutput() const;
-        // throws exception if delay is greater than history size
         numeric getDelayedOutput(std::size_t delay) const;
 
         void setExternalStimulus(numeric newExternalStimulus);

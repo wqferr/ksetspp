@@ -15,20 +15,24 @@ namespace ksets {
     public:
         K2(const K2Weights weights);
 
+        // WEIRD default behavior, activation history wasn't being copied properly
+        K2(const K2&);
+
         template<typename RNG>
         void perturbWeights(RNG& rng) {
             for (auto& node : *this) {
                 for (
-                    auto connection = node.iterInboundConnections();
-                    connection != node.endInboundConnections();
+                    auto connection = node->iterInboundConnections();
+                    connection != node->endInboundConnections();
                     connection++
-                )
-                    connection->perturbWeight(rng());
+                ) {
+                    while (!connection->perturbWeight(rng())) {}
+                }
             }
         }
 
         // Yes, I know this isn't a sphere, I just like the name
-        K0& antipodalNode() { return node(3); }
-        const K0& antipodalNode() const { return node(3); }
+        K0 *antipodalNode() { return node(3); }
+        const K0 *antipodalNode() const { return node(3); }
     };
 }
