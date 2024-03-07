@@ -8,14 +8,21 @@
 #include "ksets/activationhistory.hpp"
 
 namespace ksets {
-    class K0 {
-        struct K0Connection {
-            const K0& source;
-            numeric weight;
-            std::size_t delay;
+    class K0;
 
-            K0Connection(const K0& source, numeric weight, std::size_t delay): source(source), weight(weight), delay(delay) {}
-        };
+    struct K0Connection {
+        const K0& source;
+        const K0& target;
+        numeric weight;
+        std::size_t delay;
+
+        K0Connection(const K0& source, const K0& target, numeric weight, std::size_t delay)
+            : source(source), target(target), weight(weight), delay(delay) {}
+
+        void perturbWeight(numeric delta);
+    };
+
+    class K0 {
 
         std::vector<K0Connection> inboundConnections;
         numeric currentExternalStimulus = 0;
@@ -34,7 +41,7 @@ namespace ksets {
     public:
         K0();
 
-        void addInboundConnection(const K0& source, numeric weight, std::size_t delay);
+        void addInboundConnection(const K0& source, numeric weight, std::size_t delay=0);
 
         numeric getCurrentOutput() const;
         // throws exception if delay is greater than history size
@@ -48,5 +55,21 @@ namespace ksets {
         void calculateAndCommitNextState(numeric newExternalStimulus);
 
         const ActivationHistory& getActivationHistory() const;
+
+        auto iterInboundConnections() {
+            return inboundConnections.begin();
+        }
+
+        auto endInboundConnections() {
+            return inboundConnections.end();
+        }
+
+        const auto iterInboundConnections() const {
+            return inboundConnections.begin();
+        }
+
+        const auto endInboundConnections() const {
+            return inboundConnections.end();
+        }
     };
 }

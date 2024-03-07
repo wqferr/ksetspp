@@ -2,10 +2,15 @@
 
 #include <numeric>
 #include <tgmath.h>
-#include <cassert>
 
-using ksets::K0;
-using ksets::numeric;
+using ksets::K0, ksets::K0Connection, ksets::numeric;
+
+void K0Connection::perturbWeight(numeric delta) {
+    numeric newWeight = weight + delta;
+    if (copysign(1.0, weight) != copysign(1.0, newWeight))
+        throw std::runtime_error("Adjusted weight flipped connection from excitatory to inhibitory or vice-versa");
+    weight = newWeight;
+}
 
 K0::K0(): activationHistory() {}
 
@@ -17,7 +22,7 @@ numeric K0::calculateNetInput() {
 }
 
 void K0::addInboundConnection(const K0& source, numeric weight, std::size_t delay) {
-    inboundConnections.emplace_back(source, weight, delay);
+    inboundConnections.emplace_back(source, *this, weight, delay);
 }
 
 numeric K0::getCurrentOutput() const {
@@ -60,8 +65,6 @@ void K0::calculateNextState() {
     nextOdeState = odeState;
     nextOdeState[0] += (k1 + 2*k2 + 2*k3 + k4) / 6;
     nextOdeState[1] += (l1 + 2*l2 + 2*l3 + l4) / 6;
-    assert(nextOdeState[0] == nextOdeState[0]);
-    assert(nextOdeState[1] == nextOdeState[1]);
 }
 
 void K0::calculateNextState(numeric newExternalStimulus) {
@@ -80,11 +83,7 @@ void K0::calculateAndCommitNextState(numeric newExternalStimulus) {
 }
 
 void K0::commitNextState() {
-    // printf("X:%f %f\n", odeState[0], odeState[1]);
-    // printf("Y:%f %f\n", nextOdeState[0], nextOdeState[1]);
     odeState = nextOdeState;
-    // printf("Z:%f %f\n", odeState[0], odeState[1]);
-    // printf("W:%f %f\n", nextOdeState[0], nextOdeState[1]);
     pushOutputToHistory();
 }
 
