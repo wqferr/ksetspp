@@ -30,7 +30,7 @@ namespace ksets {
         }
 
         // Yes, I know this isn't a sphere, I just like the name
-        K0 *antipodalNode() { return node(3); }
-        const K0 *antipodalNode() const { return node(3); }
+        std::shared_ptr<K0> antipodalNode() { return node(3); }
+        const std::shared_ptr<K0> antipodalNode() const { return node(3); }
     };
 }

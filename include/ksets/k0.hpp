@@ -13,12 +13,12 @@ namespace ksets {
     class K0;
 
     struct K0Connection {
-        K0 *source;
+        std::shared_ptr<K0> source;
         K0 *target;
         numeric weight;
         std::size_t delay;
 
-        K0Connection(K0 *source, K0 *target, numeric weight, std::size_t delay)
+        K0Connection(std::shared_ptr<K0> source, K0 *target, numeric weight, std::size_t delay)
             : source(source), target(target), weight(weight), delay(delay) {}
 
         bool perturbWeight(numeric delta);
@@ -41,9 +41,10 @@ namespace ksets {
 
     public:
         K0();
-        std::map<const K0*, K0*> cloneSubgraph() const;
+        K0(const K0& other);
+        std::map<const K0 *, std::shared_ptr<K0>> cloneSubgraph() const;
 
-        void addInboundConnection(K0 *source, numeric weight, std::size_t delay=0);
+        void addInboundConnection(std::shared_ptr<K0> source, numeric weight, std::size_t delay=0);
 
         numeric getCurrentOutput() const;
         numeric getDelayedOutput(std::size_t delay) const;

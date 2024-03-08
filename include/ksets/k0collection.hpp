@@ -1,21 +1,23 @@
 #pragma once
 
-#include "ksets/k0.hpp"
 #include <vector>
+#include <memory>
+#include "ksets/k0.hpp"
 
 namespace ksets {
     class K0Collection {
-        std::vector<K0 *> nodes;
+        // TODO: fix circular reference shared pointer loop
+        std::vector<std::shared_ptr<K0>> nodes;
     public:
         K0Collection(std::size_t nNodes);
         K0Collection(const K0Collection& other);
 
         std::size_t size() const;
 
-        K0 *primaryNode() { return node(0); }
-        const K0 *primaryNode() const { return node(0); }
-        K0 *node(std::size_t index);
-        const K0 *node(std::size_t index) const;
+        std::shared_ptr<K0> primaryNode() { return node(0); }
+        const std::shared_ptr<K0> primaryNode() const { return node(0); }
+        std::shared_ptr<K0> node(std::size_t index);
+        const std::shared_ptr<K0> node(std::size_t index) const;
 
         auto begin() {
             return nodes.begin();

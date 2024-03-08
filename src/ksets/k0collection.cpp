@@ -4,25 +4,25 @@ using ksets::K0Collection, ksets::K0;
 
 K0Collection::K0Collection(std::size_t nNodes) {
     for (std::size_t i = 0; i < nNodes; i++)
-        nodes.push_back(new K0());
+        nodes.push_back(std::make_shared<K0>());
 }
 
 K0Collection::K0Collection(const K0Collection& other) {
-    std::map<const K0*, K0*> oldToNew = other.primaryNode()->cloneSubgraph();
-    for (const K0 *oldNode : other) {
-        if (oldToNew.find(oldNode) == oldToNew.end()) {
-            std::map<const K0*, K0*> extension = oldNode->cloneSubgraph();
+    std::map<const K0 *, std::shared_ptr<K0>> oldToNew = other.primaryNode()->cloneSubgraph();
+    for (const std::shared_ptr<K0> oldNode : other) {
+        if (oldToNew.find(oldNode.get()) == oldToNew.end()) {
+            std::map<const K0*, std::shared_ptr<K0>> extension = oldNode->cloneSubgraph();
             oldToNew.insert(extension.begin(), extension.end());
         }
-        nodes.push_back(oldToNew.at(oldNode));
+        nodes.push_back(oldToNew.at(oldNode.get()));
     }
 }
 
-K0 *K0Collection::node(std::size_t index) {
+std::shared_ptr<K0> K0Collection::node(std::size_t index) {
     return nodes.at(index);
 }
 
-const K0 *K0Collection::node(std::size_t index) const {
+const std::shared_ptr<K0> K0Collection::node(std::size_t index) const {
     return nodes.at(index);
 }
 

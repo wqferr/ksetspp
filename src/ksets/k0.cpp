@@ -2,6 +2,7 @@
 
 #include <numeric>
 #include <tgmath.h>
+#include <memory>
 
 using ksets::K0, ksets::K0Connection, ksets::numeric;
 
@@ -15,26 +16,34 @@ bool K0Connection::perturbWeight(numeric delta) {
 
 K0::K0(): activationHistory(HISTORY_SIZE) {}
 
+K0::K0(const K0& other):
+    activationHistory(other.activationHistory),
+    inboundConnections(),
+    odeState(other.odeState),
+    nextOdeState(other.nextOdeState),
+    currentExternalStimulus(other.currentExternalStimulus)
+{}
+
 namespace {
-    void doCloneSubgraph(std::map<const K0*, K0*>& oldToNew, const K0 *current) {
-        K0 *newCurrent = new K0(*current);
+    void doCloneSubgraph(std::map<const K0 *, std::shared_ptr<K0>>& oldToNew, const K0 *current) {
+        std::shared_ptr<K0> newCurrent = std::shared_ptr<K0>(new K0(*current));
         oldToNew.insert(std::make_pair(current, newCurrent));
         for (
             auto connIter = current->iterInboundConnections();
             connIter != current->endInboundConnections();
             connIter++
         ) {
-            K0 *other = connIter->source;
-            if (oldToNew.find(other) == oldToNew.end())
-                doCloneSubgraph(oldToNew, other);
-            K0 *newOther = oldToNew.at(other);
+            std::shared_ptr<K0> other = connIter->source;
+            if (oldToNew.find(other.get()) == oldToNew.end())
+                doCloneSubgraph(oldToNew, other.get());
+            std::shared_ptr<K0> newOther = oldToNew.at(other.get());
             newCurrent->addInboundConnection(newOther, connIter->weight, connIter->delay);
         }
     }
 }
 
-std::map<const K0*, K0*> K0::cloneSubgraph() const {
-    std::map<const K0*, K0*> oldToNew;
+std::map<const K0 *, std::shared_ptr<K0>> K0::cloneSubgraph() const {
+    std::map<const K0 *, std::shared_ptr<K0>> oldToNew;
     doCloneSubgraph(oldToNew, this);
     return oldToNew;
 }
@@ -46,7 +55,7 @@ numeric K0::calculateNetInput() {
     return accumulation;
 }
 
-void K0::addInboundConnection(K0 *source, numeric weight, std::size_t delay) {
+void K0::addInboundConnection(std::shared_ptr<K0> source, numeric weight, std::size_t delay) {
     inboundConnections.emplace_back(source, this, weight, delay);
 }
 

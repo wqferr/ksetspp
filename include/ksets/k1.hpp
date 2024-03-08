@@ -11,7 +11,7 @@ namespace ksets {
         K1(numeric wPrimarySecondary, numeric wSecondaryPrimary);
         K1(const K1& other);
 
-        K0 *secondaryNode() { return node(1); }
-        const K0 *secondaryNode() const { return node(1); }
+        std::shared_ptr<K0> secondaryNode() { return node(1); }
+        const std::shared_ptr<K0> secondaryNode() const { return node(1); }
     };
 }
