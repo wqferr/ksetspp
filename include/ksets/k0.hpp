@@ -65,6 +65,7 @@ namespace ksets {
         std::optional<std::size_t> getId() noexcept { return id; }
 
         std::map<const K0 *, std::shared_ptr<K0>> cloneSubgraph() const noexcept;
+        void cloneSubgraph(std::map<const K0 *, std::shared_ptr<K0>>& partialMapping) const noexcept;
 
         void addInboundConnection(std::shared_ptr<K0> source, numeric weight, std::size_t delay=0) noexcept;
         void clearInboundConnections() noexcept;
