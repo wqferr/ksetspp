@@ -15,4 +15,4 @@ K1::K1(numeric wPrimarySecondary, numeric wSecondaryPrimary)
     primaryNode()->addInboundConnection(secondaryNode(), wSecondaryPrimary);
 }
 
-K1::K1(const K1& other): K0Collection(other) {}
+K1::K1(const K1& other) noexcept: K0Collection(other) {}
