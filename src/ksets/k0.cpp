@@ -38,8 +38,7 @@ K0::K0(const K0& other) noexcept:
     odeState(other.odeState),
     nextOdeState(other.nextOdeState),
     currentExternalStimulus(other.currentExternalStimulus),
-    id(other.id)
-{}
+    id(other.id) {}
 
 K0::K0(K0&& other) noexcept {
     swap(other);
@@ -91,7 +90,7 @@ void K0::cloneSubgraph(std::map<const K0 *, std::shared_ptr<K0>>& partialMapping
 numeric K0::calculateNetInput() noexcept {
     numeric accumulation = currentExternalStimulus;
     for (auto& connection : inboundConnections)
-        accumulation += connection.weight * connection.source->getDelayedOutput(connection.delay);
+        accumulation += connection.weight * ksets::sigmoid(connection.source->getDelayedOutput(connection.delay));
     return accumulation;
 }
 
@@ -128,6 +127,7 @@ numeric odeF2(numeric x, numeric dx_dt, numeric totalStimulus) noexcept {
 
 void K0::calculateNextState() noexcept {
     numeric totalStimulus = calculateNetInput();
+    printf("%f\n", totalStimulus);
     numeric k1 = odeF1(odeState[0], odeState[1], totalStimulus) * ODE_STEP_SIZE;
     numeric l1 = odeF2(odeState[0], odeState[1], totalStimulus) * ODE_STEP_SIZE;
 
@@ -166,7 +166,8 @@ void K0::commitNextState() noexcept {
 }
 
 void K0::pushOutputToHistory() noexcept {
-    activationHistory.put(ksets::sigmoid(odeState[0]));
+    activationHistory.put(odeState[0]);
+    // activationHistory.put(ksets::sigmoid(odeState[0]));
 }
 
 const ksets::ActivationHistory& K0::getActivationHistory() const noexcept {
@@ -175,7 +176,7 @@ const ksets::ActivationHistory& K0::getActivationHistory() const noexcept {
 
 void K0Collection::initNodes(std::size_t nNodes) {
     if (nNodes == 0)
-        throw std::domain_error("Number of nodes cannot be 0");
+        throw std::invalid_argument("Number of nodes cannot be 0");
     for (std::size_t i = 0; i < nNodes; i++)
         nodes.push_back(std::make_shared<K0>(*this, i));
 }

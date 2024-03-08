@@ -10,6 +10,18 @@ namespace ksets {
         K2Weights(numeric wee, numeric wei, numeric wie, numeric wii)
             : wee(wee), wei(wei), wie(wie), wii(wii)
         {
+            checkWeights();
+        }
+
+        K2Weights(std::array<numeric, 4> values) {
+            wee = values[0];
+            wei = values[1];
+            wie = values[2];
+            wii = values[3];
+            checkWeights();
+        }
+    private:
+        void checkWeights() {
             if (wee < 0)
                 throw std::invalid_argument("Weight from excitatory to excitatory units cannot be negative");
             if (wei < 0)

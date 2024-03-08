@@ -9,7 +9,7 @@ K2Layer::K2Layer(
     // : units(nUnits, K2(intraUnitWeights)) --> cant copy construct K2s
 {
     if (nUnits == 0)
-        throw std::domain_error("Number of units cannot be 0");
+        throw std::invalid_argument("Number of units cannot be 0");
     for (std::size_t i = 0; i < nUnits; i++)
         units.emplace_back(intraUnitWeights);
 }
