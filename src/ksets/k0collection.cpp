@@ -4,7 +4,7 @@ using ksets::K0Collection, ksets::K0;
 
 K0Collection::K0Collection(std::size_t nNodes) {
     for (std::size_t i = 0; i < nNodes; i++)
-        nodes.push_back(std::make_shared<K0>());
+        nodes.push_back(std::make_shared<K0>(i));
 }
 
 K0Collection::K0Collection(const K0Collection& other) {

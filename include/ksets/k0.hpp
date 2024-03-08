@@ -5,6 +5,7 @@
 #include <array>
 #include <memory>
 #include <map>
+#include <optional>
 
 #include "ksets/config.hpp"
 #include "ksets/activationhistory.hpp"
@@ -39,9 +40,19 @@ namespace ksets {
         OdeState nextOdeState = {0, 0};
         ActivationHistory activationHistory;
 
+        std::optional<std::size_t> id = std::nullopt;
+
+        void swap(K0& other);
     public:
         K0();
+        K0(std::size_t id);
         K0(const K0& other);
+        K0(K0&& other);
+        K0& operator=(const K0& other);
+        K0& operator=(K0&& other);
+
+        std::optional<std::size_t> getId() { return id; }
+
         std::map<const K0 *, std::shared_ptr<K0>> cloneSubgraph() const;
 
         void addInboundConnection(std::shared_ptr<K0> source, numeric weight, std::size_t delay=0);

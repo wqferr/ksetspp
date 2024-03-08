@@ -14,15 +14,44 @@ bool K0Connection::perturbWeight(numeric delta) {
     return true;
 }
 
+void K0::swap(K0& other) {
+    activationHistory = std::exchange(other.activationHistory, activationHistory);
+    inboundConnections = std::exchange(other.inboundConnections, inboundConnections);
+    odeState = std::exchange(other.odeState, odeState);
+    nextOdeState = std::exchange(other.nextOdeState, nextOdeState);
+    currentExternalStimulus = std::exchange(other.currentExternalStimulus, currentExternalStimulus);
+    id.swap(other.id);
+}
+
 K0::K0(): activationHistory(HISTORY_SIZE) {}
+
+K0::K0(std::size_t id): id(id) {}
 
 K0::K0(const K0& other):
     activationHistory(other.activationHistory),
     inboundConnections(),
     odeState(other.odeState),
     nextOdeState(other.nextOdeState),
-    currentExternalStimulus(other.currentExternalStimulus)
+    currentExternalStimulus(other.currentExternalStimulus),
+    id(other.id)
 {}
+
+K0::K0(K0&& other) {
+    swap(other);
+    // destructor for other (old *this) runs here
+}
+
+K0& K0::operator=(const K0& other) {
+    K0 clone(other);
+    swap(clone);
+    return *this;
+}
+
+K0& K0::operator=(K0&& other) {
+    swap(other);
+    return *this;
+    // destructor for other (old *this) runs here
+}
 
 // translation unit "private" function
 namespace {
