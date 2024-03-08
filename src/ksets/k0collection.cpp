@@ -7,6 +7,17 @@ K0Collection::K0Collection(std::size_t nNodes) {
         nodes.push_back(new K0());
 }
 
+K0Collection::K0Collection(const K0Collection& other) {
+    std::map<const K0*, K0*> oldToNew = other.primaryNode()->cloneSubgraph();
+    for (const K0 *oldNode : other) {
+        if (oldToNew.find(oldNode) == oldToNew.end()) {
+            std::map<const K0*, K0*> extension = oldNode->cloneSubgraph();
+            oldToNew.insert(extension.begin(), extension.end());
+        }
+        nodes.push_back(oldToNew.at(oldNode));
+    }
+}
+
 K0 *K0Collection::node(std::size_t index) {
     return nodes.at(index);
 }

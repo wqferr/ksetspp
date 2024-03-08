@@ -28,3 +28,5 @@ K2::K2(const K2Weights weights)
 
     node(3)->addInboundConnection(node(2), weights.wii);
 }
+
+K2::K2(const K2& other): K0Collection(other) {}

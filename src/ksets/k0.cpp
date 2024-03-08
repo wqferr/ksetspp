@@ -16,7 +16,7 @@ bool K0Connection::perturbWeight(numeric delta) {
 K0::K0(): activationHistory(HISTORY_SIZE) {}
 
 namespace {
-    void doCloneSubgraph(std::map<K0*, K0*>& oldToNew, K0 *current) {
+    void doCloneSubgraph(std::map<const K0*, K0*>& oldToNew, const K0 *current) {
         K0 *newCurrent = new K0(*current);
         oldToNew.insert(std::make_pair(current, newCurrent));
         for (
@@ -27,14 +27,14 @@ namespace {
             K0 *other = connIter->source;
             if (oldToNew.find(other) == oldToNew.end())
                 doCloneSubgraph(oldToNew, other);
-            K0 *newOther = oldToNew.at(newOther);
+            K0 *newOther = oldToNew.at(other);
             newCurrent->addInboundConnection(newOther, connIter->weight, connIter->delay);
         }
     }
 }
 
-std::map<K0*, K0*> K0::cloneSubgraph() {
-    std::map<K0*, K0*> oldToNew;
+std::map<const K0*, K0*> K0::cloneSubgraph() const {
+    std::map<const K0*, K0*> oldToNew;
     doCloneSubgraph(oldToNew, this);
     return oldToNew;
 }

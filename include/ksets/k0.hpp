@@ -41,7 +41,7 @@ namespace ksets {
 
     public:
         K0();
-        std::map<K0*, K0*> cloneSubgraph();
+        std::map<const K0*, K0*> cloneSubgraph() const;
 
         void addInboundConnection(K0 *source, numeric weight, std::size_t delay=0);
 

@@ -8,6 +8,7 @@ namespace ksets {
         std::vector<K0 *> nodes;
     public:
         K0Collection(std::size_t nNodes);
+        K0Collection(const K0Collection& other);
 
         std::size_t size() const;
 

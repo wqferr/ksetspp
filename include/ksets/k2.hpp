@@ -14,9 +14,7 @@ namespace ksets {
     class K2: public K0Collection {
     public:
         K2(const K2Weights weights);
-
-        // WEIRD default behavior, activation history wasn't being copied properly
-        K2(const K2&);
+        K2(const K2& other);
 
         template<typename RNG>
         void perturbWeights(RNG& rng) {
