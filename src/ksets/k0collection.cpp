@@ -18,6 +18,11 @@ K0Collection::K0Collection(const K0Collection& other) {
     }
 }
 
+K0Collection::~K0Collection() {
+    for (auto node : nodes)
+        node->clearInboundConnections();
+}
+
 std::shared_ptr<K0> K0Collection::node(std::size_t index) {
     return nodes.at(index);
 }

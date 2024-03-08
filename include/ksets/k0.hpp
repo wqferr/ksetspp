@@ -45,6 +45,7 @@ namespace ksets {
         std::map<const K0 *, std::shared_ptr<K0>> cloneSubgraph() const;
 
         void addInboundConnection(std::shared_ptr<K0> source, numeric weight, std::size_t delay=0);
+        void clearInboundConnections();
 
         numeric getCurrentOutput() const;
         numeric getDelayedOutput(std::size_t delay) const;

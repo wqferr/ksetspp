@@ -6,11 +6,11 @@
 
 namespace ksets {
     class K0Collection {
-        // TODO: fix circular reference shared pointer loop
         std::vector<std::shared_ptr<K0>> nodes;
     public:
         K0Collection(std::size_t nNodes);
         K0Collection(const K0Collection& other);
+        ~K0Collection();
 
         std::size_t size() const;
 

@@ -24,6 +24,7 @@ K0::K0(const K0& other):
     currentExternalStimulus(other.currentExternalStimulus)
 {}
 
+// translation unit "private" function
 namespace {
     void doCloneSubgraph(std::map<const K0 *, std::shared_ptr<K0>>& oldToNew, const K0 *current) {
         std::shared_ptr<K0> newCurrent = std::shared_ptr<K0>(new K0(*current));
@@ -57,6 +58,10 @@ numeric K0::calculateNetInput() {
 
 void K0::addInboundConnection(std::shared_ptr<K0> source, numeric weight, std::size_t delay) {
     inboundConnections.emplace_back(source, this, weight, delay);
+}
+
+void K0::clearInboundConnections() {
+    inboundConnections.clear();
 }
 
 numeric K0::getCurrentOutput() const {
