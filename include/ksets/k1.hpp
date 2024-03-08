@@ -3,7 +3,6 @@
 #include <array>
 
 #include "ksets/k0.hpp"
-#include "ksets/k0collection.hpp"
 
 namespace ksets {
     class K1: public K0Collection {

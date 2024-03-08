@@ -17,7 +17,6 @@ add_library(
     src/ksets/k2.cpp
     src/ksets/k2layer.cpp
     src/ksets/k3.cpp
-    src/ksets/k0collection.cpp
 )
 target_link_libraries(main ksets)
 target_include_directories(ksets PUBLIC ./include)

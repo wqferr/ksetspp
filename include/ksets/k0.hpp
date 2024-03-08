@@ -12,6 +12,7 @@
 
 namespace ksets {
     class K0;
+    class K0Collection;
 
     struct K0Connection {
         std::shared_ptr<K0> source;
@@ -41,6 +42,7 @@ namespace ksets {
         ActivationHistory activationHistory;
 
         std::optional<std::size_t> id = std::nullopt;
+        std::optional<std::reference_wrapper<K0Collection>> collection = std::nullopt;
 
         void swap(K0& other);
     public:
@@ -51,6 +53,7 @@ namespace ksets {
         K0& operator=(const K0& other);
         K0& operator=(K0&& other);
 
+        std::optional<std::reference_wrapper<K0Collection>> getCollection() { return collection; }
         std::optional<std::size_t> getId() { return id; }
 
         std::map<const K0 *, std::shared_ptr<K0>> cloneSubgraph() const;
@@ -85,5 +88,49 @@ namespace ksets {
         const auto endInboundConnections() const {
             return inboundConnections.end();
         }
+    };
+
+    class K0Collection {
+        std::vector<std::shared_ptr<K0>> nodes;
+        std::optional<std::string> name;
+
+        void initNodes(std::size_t nNodes);
+    public:
+        K0Collection(std::size_t nNodes);
+        K0Collection(std::size_t nNodes, std::string name);
+        K0Collection(const K0Collection& other);
+        ~K0Collection();
+
+        std::optional<std::string>& getName() { return name; }
+
+        std::size_t size() const;
+
+        std::shared_ptr<K0> primaryNode() { return node(0); }
+        const std::shared_ptr<K0> primaryNode() const { return node(0); }
+        std::shared_ptr<K0> node(std::size_t index);
+        const std::shared_ptr<K0> node(std::size_t index) const;
+
+        auto begin() {
+            return nodes.begin();
+        }
+
+        auto end() {
+            return nodes.end();
+        }
+
+        const auto begin() const {
+            return nodes.begin();
+        }
+
+        const auto end() const {
+            return nodes.end();
+        }
+
+        void setExternalStimulus(numeric newExternalStimulus);
+        void calculateNextState();
+        void calculateNextState(numeric newExternalStimulus);
+        void commitNextState();
+        void calculateAndCommitNextState();
+        void calculateAndCommitNextState(numeric newExternalStimulus);
     };
 }

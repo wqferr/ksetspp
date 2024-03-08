@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-#include "ksets/k0collection.hpp"
+#include "ksets/k0.hpp"
 
 namespace ksets {
     struct K2Weights {
