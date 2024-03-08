@@ -8,48 +8,57 @@ namespace ksets {
     class K2Layer {
         std::vector<K2> units;
     public:
+        // throws if nUnits is 0
         K2Layer(std::size_t nUnits, const K2Weights intraUnitWeights);
-        K2Layer(const K2Layer&) = delete;
 
-        bool connectPrimaryNodes(numeric interUnitWeight, std::size_t delay);
-        bool connectAntipodalNodes(numeric interUnitWeight, std::size_t delay);
+        // why did I delete this?
+        // K2Layer(const K2Layer&) = delete;
 
-        std::size_t size() const;
+        // these return true if weight was valid => operation succeeded
+        bool connectPrimaryNodes(numeric interUnitWeight, std::size_t delay) noexcept;
+        bool connectAntipodalNodes(numeric interUnitWeight, std::size_t delay) noexcept;
+
+        std::size_t size() const noexcept;
 
         template<typename RNG>
-        void perturbIntraUnitWeights(RNG& rng) {
+        void perturbIntraUnitWeights(RNG& rng) noexcept {
             for (auto& unit : units)
                 unit.perturbWeights(rng);
         }
 
+        // these throw if index >= size()
         K2& unit(std::size_t index);
         const K2& unit(std::size_t index) const;
 
-        auto begin() {
+        auto begin() noexcept {
             return units.begin();
         }
 
-        auto end() {
+        auto end() noexcept {
             return units.end();
         }
 
-        const auto begin() const {
+        const auto begin() const noexcept {
             return units.begin();
         }
 
-        const auto end() const {
+        const auto end() const noexcept {
             return units.end();
         }
 
-        bool setExternalStimulus(std::initializer_list<numeric> values);
-        void calculateNextState();
-        bool calculateNextState(std::initializer_list<numeric> newExternalStimulus);
-        void commitNextState();
-        void calculateAndCommitNextState();
-        bool calculateAndCommitNextState(std::initializer_list<numeric> newExternalStimulus);
+        // the functions that return bool signal whether the operation succeeded
+        // via their return value
+        bool setExternalStimulus(std::initializer_list<numeric> values) noexcept;
+        void calculateNextState() noexcept;
+        bool calculateNextState(std::initializer_list<numeric> newExternalStimulus) noexcept;
+        void commitNextState() noexcept;
+        void calculateAndCommitNextState() noexcept;
+        bool calculateAndCommitNextState(std::initializer_list<numeric> newExternalStimulus) noexcept;
 
         template<typename T>
-        bool setExternalStimulus(T valuesBegin, T valuesEnd) {
+        bool setExternalStimulus(T valuesBegin, T valuesEnd) noexcept {
+            if (valuesEnd - valuesBegin != end() - begin())
+                return false;
             auto unitIter = this->begin();
             auto valueIter = valuesBegin;
 
@@ -58,7 +67,7 @@ namespace ksets {
                 unitIter++;
                 valueIter++;
             }
-            return unitIter == end() && valueIter == valuesEnd;
+            return true;
         }
 
         template<typename T>
