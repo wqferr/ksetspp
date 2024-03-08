@@ -127,7 +127,6 @@ numeric odeF2(numeric x, numeric dx_dt, numeric totalStimulus) noexcept {
 
 void K0::calculateNextState() noexcept {
     numeric totalStimulus = calculateNetInput();
-    printf("%f\n", totalStimulus);
     numeric k1 = odeF1(odeState[0], odeState[1], totalStimulus) * ODE_STEP_SIZE;
     numeric l1 = odeF2(odeState[0], odeState[1], totalStimulus) * ODE_STEP_SIZE;
 
