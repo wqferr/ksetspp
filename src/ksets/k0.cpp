@@ -3,10 +3,11 @@
 #include <numeric>
 #include <tgmath.h>
 #include <memory>
+#include <stdexcept>
 
 using ksets::K0, ksets::K0Connection, ksets::K0Collection, ksets::numeric;
 
-bool K0Connection::perturbWeight(numeric delta) {
+bool K0Connection::perturbWeight(numeric delta) noexcept {
     numeric newWeight = weight + delta;
     if (copysign(1.0, weight) != copysign(1.0, newWeight))
         return false;
@@ -14,7 +15,7 @@ bool K0Connection::perturbWeight(numeric delta) {
     return true;
 }
 
-void K0::swap(K0& other) {
+void K0::swap(K0& other) noexcept {
     activationHistory = std::exchange(other.activationHistory, activationHistory);
     inboundConnections = std::exchange(other.inboundConnections, inboundConnections);
     odeState = std::exchange(other.odeState, odeState);
@@ -23,11 +24,15 @@ void K0::swap(K0& other) {
     id.swap(other.id);
 }
 
-K0::K0(): activationHistory(HISTORY_SIZE) {}
+K0::K0() noexcept: activationHistory(HISTORY_SIZE) {}
 
-K0::K0(std::size_t id): id(id) {}
+K0::K0(std::size_t id) noexcept: id(id) {}
 
-K0::K0(const K0& other):
+K0::K0(K0Collection& collection, std::size_t id) noexcept: id(id), collection(collection) {
+
+}
+
+K0::K0(const K0& other) noexcept:
     activationHistory(other.activationHistory),
     inboundConnections(),
     odeState(other.odeState),
@@ -36,18 +41,18 @@ K0::K0(const K0& other):
     id(other.id)
 {}
 
-K0::K0(K0&& other) {
+K0::K0(K0&& other) noexcept {
     swap(other);
     // destructor for other (old *this) runs here
 }
 
-K0& K0::operator=(const K0& other) {
+K0& K0::operator=(const K0& other) noexcept {
     K0 clone(other);
     swap(clone);
     return *this;
 }
 
-K0& K0::operator=(K0&& other) {
+K0& K0::operator=(K0&& other) noexcept {
     swap(other);
     return *this;
     // destructor for other (old *this) runs here
@@ -55,7 +60,7 @@ K0& K0::operator=(K0&& other) {
 
 // translation unit "private" function
 namespace {
-    void doCloneSubgraph(std::map<const K0 *, std::shared_ptr<K0>>& oldToNew, const K0 *current) {
+    void doCloneSubgraph(std::map<const K0 *, std::shared_ptr<K0>>& oldToNew, const K0 *current) noexcept {
         std::shared_ptr<K0> newCurrent = std::shared_ptr<K0>(new K0(*current));
         oldToNew.insert(std::make_pair(current, newCurrent));
         for (
@@ -72,51 +77,51 @@ namespace {
     }
 }
 
-std::map<const K0 *, std::shared_ptr<K0>> K0::cloneSubgraph() const {
+std::map<const K0 *, std::shared_ptr<K0>> K0::cloneSubgraph() const noexcept {
     std::map<const K0 *, std::shared_ptr<K0>> oldToNew;
     doCloneSubgraph(oldToNew, this);
     return oldToNew;
 }
 
-numeric K0::calculateNetInput() {
+numeric K0::calculateNetInput() noexcept {
     numeric accumulation = currentExternalStimulus;
     for (auto& connection : inboundConnections)
         accumulation += connection.weight * connection.source->getDelayedOutput(connection.delay);
     return accumulation;
 }
 
-void K0::addInboundConnection(std::shared_ptr<K0> source, numeric weight, std::size_t delay) {
+void K0::addInboundConnection(std::shared_ptr<K0> source, numeric weight, std::size_t delay) noexcept {
     inboundConnections.emplace_back(source, this, weight, delay);
 }
 
-void K0::clearInboundConnections() {
+void K0::clearInboundConnections() noexcept {
     inboundConnections.clear();
 }
 
-numeric K0::getCurrentOutput() const {
+numeric K0::getCurrentOutput() const noexcept {
     return getDelayedOutput(0);
 }
 
-numeric K0::getDelayedOutput(std::size_t delay) const {
+numeric K0::getDelayedOutput(std::size_t delay) const noexcept {
     return activationHistory.get(delay);
 }
 
-void K0::setExternalStimulus(numeric newExternalStimulus) {
+void K0::setExternalStimulus(numeric newExternalStimulus) noexcept {
     currentExternalStimulus = newExternalStimulus;
 }
 
-numeric odeF1(numeric x, numeric dx_dt, numeric totalStimulus) {
+numeric odeF1(numeric x, numeric dx_dt, numeric totalStimulus) noexcept {
     (void) x;
     (void) totalStimulus;
     return dx_dt;
 }
 
-numeric odeF2(numeric x, numeric dx_dt, numeric totalStimulus) {
+numeric odeF2(numeric x, numeric dx_dt, numeric totalStimulus) noexcept {
     using ksets::ODE_A_DECAY_RATE, ksets::ODE_B_RISE_RATE;
     return (-(ODE_A_DECAY_RATE+ODE_B_RISE_RATE)*dx_dt) + (ODE_A_DECAY_RATE*ODE_B_RISE_RATE*(totalStimulus - x));
 }
 
-void K0::calculateNextState() {
+void K0::calculateNextState() noexcept {
     numeric totalStimulus = calculateNetInput();
     numeric k1 = odeF1(odeState[0], odeState[1], totalStimulus) * ODE_STEP_SIZE;
     numeric l1 = odeF2(odeState[0], odeState[1], totalStimulus) * ODE_STEP_SIZE;
@@ -135,35 +140,37 @@ void K0::calculateNextState() {
     nextOdeState[1] += (l1 + 2*l2 + 2*l3 + l4) / 6;
 }
 
-void K0::calculateNextState(numeric newExternalStimulus) {
+void K0::calculateNextState(numeric newExternalStimulus) noexcept {
     setExternalStimulus(newExternalStimulus);
     calculateNextState();
 }
 
-void K0::calculateAndCommitNextState() {
+void K0::calculateAndCommitNextState() noexcept {
     calculateNextState();
     commitNextState();
 }
 
-void K0::calculateAndCommitNextState(numeric newExternalStimulus) {
+void K0::calculateAndCommitNextState(numeric newExternalStimulus) noexcept {
     calculateNextState(newExternalStimulus);
     commitNextState();
 }
 
-void K0::commitNextState() {
+void K0::commitNextState() noexcept {
     odeState = nextOdeState;
     pushOutputToHistory();
 }
 
-void K0::pushOutputToHistory() {
+void K0::pushOutputToHistory() noexcept {
     activationHistory.put(ksets::sigmoid(odeState[0]));
 }
 
-const ksets::ActivationHistory& K0::getActivationHistory() const {
+const ksets::ActivationHistory& K0::getActivationHistory() const noexcept {
     return activationHistory;
 }
 
 void K0Collection::initNodes(std::size_t nNodes) {
+    if (nNodes == 0)
+        throw std::domain_error("Number of nodes cannot be 0");
     for (std::size_t i = 0; i < nNodes; i++)
         nodes.push_back(std::make_shared<K0>(*this, i));
 }
@@ -176,7 +183,7 @@ K0Collection::K0Collection(std::size_t nNodes, std::string name): name(name) {
     initNodes(nNodes);
 }
 
-K0Collection::K0Collection(const K0Collection& other) {
+K0Collection::K0Collection(const K0Collection& other) noexcept {
     std::map<const K0 *, std::shared_ptr<K0>> oldToNew = other.primaryNode()->cloneSubgraph();
     for (const std::shared_ptr<K0> oldNode : other) {
         if (oldToNew.find(oldNode.get()) == oldToNew.end()) {
@@ -187,7 +194,7 @@ K0Collection::K0Collection(const K0Collection& other) {
     }
 }
 
-K0Collection::~K0Collection() {
+K0Collection::~K0Collection() noexcept {
     for (auto node : nodes)
         node->clearInboundConnections();
 }
@@ -200,35 +207,35 @@ const std::shared_ptr<K0> K0Collection::node(std::size_t index) const {
     return nodes.at(index);
 }
 
-std::size_t K0Collection::size() const {
+std::size_t K0Collection::size() const noexcept {
     return nodes.size();
 }
 
-void K0Collection::setExternalStimulus(numeric newExternalStimulus) {
+void K0Collection::setExternalStimulus(numeric newExternalStimulus) noexcept {
     primaryNode()->setExternalStimulus(newExternalStimulus);
 }
 
-void K0Collection::calculateNextState() {
+void K0Collection::calculateNextState() noexcept {
     for (auto node : nodes)
         node->calculateNextState();
 }
 
-void K0Collection::calculateNextState(numeric newExternalStimulus) {
+void K0Collection::calculateNextState(numeric newExternalStimulus) noexcept {
     setExternalStimulus(newExternalStimulus);
     calculateNextState();
 }
 
-void K0Collection::commitNextState() {
+void K0Collection::commitNextState() noexcept {
     for (auto node : nodes)
         node->commitNextState();
 }
 
-void K0Collection::calculateAndCommitNextState() {
+void K0Collection::calculateAndCommitNextState() noexcept {
     calculateNextState();
     commitNextState();
 }
 
-void K0Collection::calculateAndCommitNextState(numeric newExternalStimulus) {
+void K0Collection::calculateAndCommitNextState(numeric newExternalStimulus) noexcept {
     calculateNextState(newExternalStimulus);
     commitNextState();
 }
