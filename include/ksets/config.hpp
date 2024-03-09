@@ -10,6 +10,7 @@ namespace ksets {
     constexpr numeric DEFAULT_LEARN_RATE = 0.05;
 
     constexpr numeric ODE_STEP_SIZE = 0.5;
+    constexpr std::size_t ODE_ITERS_PER_MILLISECOND = std::ceil(1 / ODE_STEP_SIZE);
     constexpr numeric ODE_A_DECAY_RATE = 0.22;
     constexpr numeric ODE_B_RISE_RATE = 0.72;
 

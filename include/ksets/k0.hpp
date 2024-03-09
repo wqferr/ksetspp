@@ -96,7 +96,14 @@ namespace ksets {
 
         const auto endInboundConnections() const noexcept {
             return inboundConnections.end();
+
         }
+
+        template<typename RNG>
+        void randomizeState(RNG& rng) {
+            odeState[0] = rng();
+        }
+
     };
 
     class K0Collection {
@@ -149,5 +156,11 @@ namespace ksets {
         void commitNextState() noexcept;
         void calculateAndCommitNextState() noexcept;
         void calculateAndCommitNextState(numeric newExternalStimulus) noexcept;
+
+        template<typename RNG>
+        void randomizeK0States(RNG& rng) {
+            for (auto& k0 : nodes)
+                k0->randomizeState(rng);
+        }
     };
 }

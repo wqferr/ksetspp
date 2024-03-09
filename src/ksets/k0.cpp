@@ -90,7 +90,7 @@ void K0::cloneSubgraph(std::map<const K0 *, std::shared_ptr<K0>>& partialMapping
 numeric K0::calculateNetInput() noexcept {
     numeric accumulation = currentExternalStimulus;
     for (auto& connection : inboundConnections)
-        accumulation += connection.weight * ksets::sigmoid(connection.source->getDelayedOutput(connection.delay));
+        accumulation += connection.weight * connection.source->getDelayedOutput(connection.delay);
     return accumulation;
 }
 
@@ -165,8 +165,7 @@ void K0::commitNextState() noexcept {
 }
 
 void K0::pushOutputToHistory() noexcept {
-    activationHistory.put(odeState[0]);
-    // activationHistory.put(ksets::sigmoid(odeState[0]));
+    activationHistory.put(ksets::sigmoid(odeState[0]));
 }
 
 const ksets::ActivationHistory& K0::getActivationHistory() const noexcept {

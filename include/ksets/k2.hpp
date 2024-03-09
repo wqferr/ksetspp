@@ -38,18 +38,18 @@ namespace ksets {
         K2(const K2Weights weights) noexcept;
         K2(const K2& other) noexcept;
 
-        template<typename RNG>
-        void perturbWeights(RNG& rng) noexcept {
-            for (auto& node : *this) {
-                for (
-                    auto connection = node->iterInboundConnections();
-                    connection != node->endInboundConnections();
-                    connection++
-                ) {
-                    while (!connection->perturbWeight(rng())) {}
-                }
-            }
-        }
+        // template<typename RNG>
+        // void perturbWeights(RNG& rng) noexcept {
+        //     for (auto& node : *this) {
+        //         for (
+        //             auto connection = node->iterInboundConnections();
+        //             connection != node->endInboundConnections();
+        //             connection++
+        //         ) {
+        //             while (!connection->perturbWeight(rng())) {}
+        //         }
+        //     }
+        // }
 
         // Yes, I know this isn't a sphere, I just like the name
         std::shared_ptr<K0> antipodalNode() noexcept { return node(3); }

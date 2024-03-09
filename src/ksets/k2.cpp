@@ -18,6 +18,7 @@ K2::K2(const K2Weights weights) noexcept
     node(2)->addInboundConnection(node(3), weights.wii);
 
     node(3)->addInboundConnection(node(0), weights.wei);
+    node(3)->addInboundConnection(node(1), weights.wei);
     node(3)->addInboundConnection(node(2), weights.wii);
 }
 

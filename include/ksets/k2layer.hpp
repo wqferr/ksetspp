@@ -20,11 +20,11 @@ namespace ksets {
 
         std::size_t size() const noexcept;
 
-        template<typename RNG>
-        void perturbIntraUnitWeights(RNG& rng) noexcept {
-            for (auto& unit : units)
-                unit.perturbWeights(rng);
-        }
+        // template<typename RNG>
+        // void perturbIntraUnitWeights(RNG& rng) noexcept {
+        //     for (auto& unit : units)
+        //         unit.perturbWeights(rng);
+        // }
 
         // these throw if index >= size()
         K2& unit(std::size_t index);
@@ -84,6 +84,12 @@ namespace ksets {
                 return false;
             commitNextState();
             return true;
+        }
+
+        template<typename RNG>
+        void randomizeK0States(RNG& rng) {
+            for (auto& unit : units)
+                unit.randomizeK0States(rng);
         }
     };
 }

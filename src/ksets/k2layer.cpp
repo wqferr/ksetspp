@@ -16,6 +16,7 @@ K2Layer::K2Layer(
 
 bool K2Layer::connectPrimaryNodes(numeric weight, std::size_t delay) noexcept {
     if (weight < 0) return false;
+    if (size() > 1) weight /= size() - 1;
     auto it1 = begin();
     for (auto it1 = begin(); it1 < end(); it1++) {
         auto it2 = it1 + 1;
@@ -30,6 +31,7 @@ bool K2Layer::connectPrimaryNodes(numeric weight, std::size_t delay) noexcept {
 
 bool K2Layer::connectAntipodalNodes(numeric weight, std::size_t delay) noexcept {
     if (weight > 0) return false;
+    if (size() > 1) weight /= size() - 1;
     auto it1 = begin();
     for (auto it1 = begin(); it1 < end(); it1++) {
         auto it2 = it1 + 1;
