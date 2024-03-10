@@ -190,9 +190,8 @@ K0Collection::K0Collection(std::size_t nNodes, std::string name): name(name) {
 K0Collection::K0Collection(const K0Collection& other) noexcept {
     std::map<const K0 *, std::shared_ptr<K0>> oldToNew = other.primaryNode()->cloneSubgraph();
     for (const std::shared_ptr<K0> oldNode : other) {
-        if (oldToNew.find(oldNode.get()) == oldToNew.end()) {
+        if (oldToNew.find(oldNode.get()) == oldToNew.end())
             oldNode->cloneSubgraph(oldToNew);
-        }
         nodes.push_back(oldToNew.at(oldNode.get()));
     }
 }
