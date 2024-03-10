@@ -57,7 +57,7 @@ void ActivationHistory::doMonitoring(numeric newestValue) {
 
 std::pair<numeric, numeric> ActivationHistory::varianceNumeratorAndSum(std::size_t window) const {
     if (window == 0) return {0, 0};
-    if (window == 1) return {get(0), 0};
+    if (window == 1) return {0, get(0)};
     numeric sum = get(window);
     numeric varianceNum = 0;
     std::size_t n = 1;
