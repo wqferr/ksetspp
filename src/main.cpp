@@ -47,18 +47,18 @@ int main(void) {
         k2l.calculateAndCommitNextState();
     }
     k2l.setExternalStimulus({0, 0, 0, 0});
-    for (int i = 0; i < 200; i++) {
+    for (int i = 0; i < 2000; i++) {
         // k0.calculateAndCommitNextState(0);
         // k1.calculateAndCommitNextState(0);
         // k2.calculateAndCommitNextState(0);
-        // k2l.calculateAndCommitNextState();
+        k2l.calculateAndCommitNextState();
     }
     // auto otherk = ksets::K0Collection(k2);
     // for (int i = 0; i < 30; i++) {
     //     otherk.calculateAndCommitNextState(0);
     // }
 
-    std::size_t fileHistSize = 500;
+    std::size_t fileHistSize = 1500;
     std::ofstream ofs("data.csv");
     // writeCsv(ofs, fileHistSize, k0);
     // writeCsv(ofs, fileHistSize, *k1.primaryNode());
@@ -66,14 +66,8 @@ int main(void) {
     // writeCsv(ofs, fileHistSize, *k2.primaryNode());
     // writeCsv(ofs, fileHistSize, *k2.antipodalNode());
     // writeCsv(ofs, fileHistSize, *otherk.antipodalNode());
-    // for (auto& unit : k2l) {
-    //     writeCsv(ofs, fileHistSize, *unit.primaryNode());
-    //     writeCsv(ofs, fileHistSize, *unit.antipodalNode());
-    // }
-
-    ksets::ActivationHistory activationTest;
-    activationTest.setActivityMonitoring(2000);
-    activationTest.fillWithNoise(10'000, rng);
-    puts("");
-    printf("%f\n", activationTest.variance());
+    for (auto& unit : k2l) {
+        writeCsv(ofs, fileHistSize, *unit.primaryNode());
+        writeCsv(ofs, fileHistSize, *unit.antipodalNode());
+    }
 }

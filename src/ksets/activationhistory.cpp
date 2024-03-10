@@ -55,6 +55,8 @@ void ActivationHistory::doMonitoring(numeric newestValue) {
     m.sum = newSum;
 }
 
+// Welford's algorithm allows us to compute the RMS with a single pass and *more* numerical stability
+// https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford's_online_algorithm
 std::pair<numeric, numeric> ActivationHistory::varianceNumeratorAndSum(std::size_t window) const {
     if (window == 0) return {0, 0};
     if (window == 1) return {0, get(0)};
