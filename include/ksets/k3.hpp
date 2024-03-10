@@ -69,6 +69,16 @@ namespace ksets {
         /// Delay for wDPC_PC. See wDPC_PC for more information.
         std::size_t dDPC_PC = 1;
 
+        /// Weight between the deep pyramid cells (DPC, <unknown function>) and the olfactory bulb (OB, layer 1
+        /// of K2 sets). It connects the single K0 set of DPC to all antipodal K0 sets in OB. Must be positive.
+        /// THIS DEFAULT VALUE IS A GUESS! I DON'T KNOW THE ACTUAL VALUES OF THIS WEIGHT OR DELAY WITHOUT
+        /// ACCESS TO THE ARTICLE.
+        numeric wDPC_OB_toAntipodal = 0.50;
+
+        /// Delay for wDPC_OB_toAntipodal. See wDPC_OB_toAntipodal for more information.
+        std::size_t wDPC_OB_toAntipodal = 40;
+
+
         /// Scaling factor for noise injected into the primary K0 of the anterior olfactory nucleus (AON, layer 2 of
         /// K2 sets). The injected noise follows a gaussian distribution with mean 0 and standard deviation wnoise_AON.
         /// Must be positive.
@@ -82,7 +92,7 @@ namespace ksets {
         constexpr bool checkWeightsValidity() const {
             return pos(wPON_interUnit) && pos(wPON_OB) && pos(wOB_AON_lot) && pos(wOB_PC_lot)
                 && pos(wAON_PON_mot) && pos(wAON_OB_toAntipodal) && neg(wPC_DPC) && pos(wDPC_PC)
-                && pos(wAON_noise);
+                && pos(wDPC_OB_toAntipodal) && pos(wAON_noise);
         }
     private:
         constexpr bool pos(numeric value) const { return value > 0; }
