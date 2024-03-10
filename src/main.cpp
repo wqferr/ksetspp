@@ -32,7 +32,7 @@ int main(void) {
     // seeded RNG
     std::mt19937 gen {0};
     std::normal_distribution dist {0.0, 0.02};
-    auto rng = [&gen, &dist]() {return dist(gen);};
+    auto rng = [&gen, &dist]() {return static_cast<ksets::numeric>(dist(gen));};
     k2l.randomizeK0States(rng);
 
     // reach steadystate for resting k2l

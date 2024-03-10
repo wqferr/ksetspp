@@ -86,10 +86,6 @@ namespace ksets {
             return true;
         }
 
-        template<typename RNG>
-        void randomizeK0States(RNG& rng) {
-            for (auto& unit : units)
-                unit.randomizeK0States(rng);
-        }
+        void randomizeK0States(const std::function<numeric()>& rng);
     };
 }

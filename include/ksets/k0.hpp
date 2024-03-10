@@ -6,6 +6,7 @@
 #include <memory>
 #include <map>
 #include <optional>
+#include <functional>
 
 #include "ksets/config.hpp"
 #include "ksets/activationhistory.hpp"
@@ -157,10 +158,6 @@ namespace ksets {
         void calculateAndCommitNextState() noexcept;
         void calculateAndCommitNextState(numeric newExternalStimulus) noexcept;
 
-        template<typename RNG>
-        void randomizeK0States(RNG& rng) {
-            for (auto& k0 : nodes)
-                k0->randomizeState(rng);
-        }
+        void randomizeK0States(const std::function<numeric()>& rng);
     };
 }

@@ -242,3 +242,8 @@ void K0Collection::calculateAndCommitNextState(numeric newExternalStimulus) noex
     calculateNextState(newExternalStimulus);
     commitNextState();
 }
+
+void K0Collection::randomizeK0States(const std::function<numeric()>& rng) {
+    for (auto& k0 : nodes)
+        k0->randomizeState(rng);
+}

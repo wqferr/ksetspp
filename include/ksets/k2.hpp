@@ -38,6 +38,8 @@ namespace ksets {
         K2(const K2Weights weights) noexcept;
         K2(const K2& other) noexcept;
 
+        // TODO: if this gets readded to the spec, make it receive a std::function<numeric()> instead of
+        // being a member template function
         // template<typename RNG>
         // void perturbWeights(RNG& rng) noexcept {
         //     for (auto& node : *this) {

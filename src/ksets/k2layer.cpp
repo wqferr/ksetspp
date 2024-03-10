@@ -82,3 +82,8 @@ void K2Layer::calculateAndCommitNextState() noexcept {
 bool K2Layer::calculateAndCommitNextState(std::initializer_list<numeric> newExternalStimulus) noexcept {
     return calculateAndCommitNextState(newExternalStimulus.begin(), newExternalStimulus.end());
 }
+
+void K2Layer::randomizeK0States(const std::function<numeric()>& rng) {
+    for (auto &unit : units)
+        unit.randomizeK0States(rng);
+}
