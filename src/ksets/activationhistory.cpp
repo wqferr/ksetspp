@@ -31,8 +31,8 @@ void ActivationHistory::initMonitoring() {
 }
 
 void ActivationHistory::setActivityMonitoring(std::size_t windowSize) {
-    if (windowSize >= history.size())
-        throw std::invalid_argument("Monitoring window must be strictly less than history size");
+    if (windowSize > history.size())
+        throw std::invalid_argument("Monitoring window must be less than or equal to history size");
 
     if (windowSize == 0) {
         monitoredWindow.reset();
