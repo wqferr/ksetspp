@@ -4,6 +4,7 @@
 #include <vector>
 #include <cassert>
 #include <memory>
+#include <functional>
 
 #include "ksets/k0.hpp"
 #include "ksets/k2.hpp"
@@ -133,11 +134,52 @@ namespace ksets {
         K2 anteriorOlfactoryNucleus;
         K2 prepiriformCortex;
         std::shared_ptr<K0> deepPyramidCells;
+        std::function<numeric()> aonStimulusRng;
 
-        void connectPrimaryOlfactoryNerveLaterally(numeric weight, std::size_t delay=0);
-        void connectLayers(const K3Config& config);
+        void connectPrimaryOlfactoryNerveLaterally(numeric weight, std::size_t delay=0) noexcept;
+        void connectLayers(const K3Config& config) noexcept;
+        void connectAllSubcomponents(const K3Config& config) noexcept;
+
+        void randomizeK0States(std::function<numeric()> rng) noexcept;
+
+        void calculateNextState() noexcept;
+        void commitNextState() noexcept;
+        void calculateAndCommitNextState() noexcept;
+
+        void eraseExternalStimulus() noexcept;
+
+        template<typename Iterator>
+        void setPattern(Iterator patternFirst, Iterator patternEnd) {
+            if (patternEnd - patternFirst != primaryOlfactoryNerve.size())
+                throw std::invalid_argument("Pattern length does not match input layer size");
+            auto pnIter = primaryOlfactoryNerve.begin();
+            auto obIter = olfactoryBulb.begin();
+            auto patternIter = patternFirst;
+            while (patternIter != patternEnd) {
+                assert(pnIter != primaryOlfactoryNerve.end());
+                assert(obIter != olfactoryBulb.end());
+                (*pnIter)->setExternalStimulus(*patternIter);
+                obIter->setExternalStimulus(*patternIter);
+                patternIter++;
+                pnIter++;
+                obIter++;
+            }
+        }
+
+        void advanceAonNoise() noexcept;
+
+        void run(numeric milliseconds) noexcept;
 
     public:
-        K3(std::size_t olfactoryBulbNumUnits, K3Config config=K3Config());
+        K3(std::size_t olfactoryBulbNumUnits, numeric initialRestMilliseconds, K3Config config=K3Config());
+        K3(std::size_t olfactoryBulbNumUnits, numeric initialRestMilliseconds, std::function<numeric()> rng, K3Config config=K3Config());
+
+        void rest(numeric milliseconds) noexcept;
+
+        template<typename Iterator>
+        void present(numeric milliseconds, Iterator patternFirst, Iterator patternLast) {
+            setPattern(patternFirst, patternLast);
+            run(milliseconds);
+        }
     };
 }

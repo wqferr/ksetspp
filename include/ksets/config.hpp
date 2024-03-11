@@ -10,7 +10,7 @@ namespace ksets {
     constexpr numeric DEFAULT_LEARN_RATE = 0.05;
 
     constexpr numeric ODE_STEP_SIZE = 0.5;
-    constexpr std::size_t ODE_ITERS_PER_MILLISECOND(numeric milliseconds) {
+    constexpr std::size_t odeMillisecondsToIters(numeric milliseconds) {
         return std::ceil(milliseconds / ODE_STEP_SIZE);
     }
 
@@ -22,6 +22,8 @@ namespace ksets {
     constexpr numeric sigmoid(numeric x) {
         return SIGMOID_Q * (1 - std::exp(-(std::exp(x)-1) / SIGMOID_Q));
     }
+
+    constexpr numeric defaultK3RandomK0InitializationStdDev = 0.02;
 
     // Default weights for the K3 set were moved to K3Config in k3.hpp
 }

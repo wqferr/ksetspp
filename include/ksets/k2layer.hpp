@@ -55,8 +55,8 @@ namespace ksets {
         void calculateAndCommitNextState() noexcept;
         bool calculateAndCommitNextState(std::initializer_list<numeric> newExternalStimulus) noexcept;
 
-        template<typename T>
-        bool setExternalStimulus(T valuesBegin, T valuesEnd) noexcept {
+        template<typename Iterator>
+        bool setExternalStimulus(Iterator valuesBegin, Iterator valuesEnd) noexcept {
             if (valuesEnd - valuesBegin != end() - begin())
                 return false;
             auto unitIter = this->begin();
@@ -70,16 +70,16 @@ namespace ksets {
             return true;
         }
 
-        template<typename T>
-        bool calculateNextState(T stimulusBegin, T stimulusEnd) {
+        template<typename Iterator>
+        bool calculateNextState(Iterator stimulusBegin, Iterator stimulusEnd) {
             if (!setExternalStimulus(stimulusBegin, stimulusEnd))
                 return false;
             calculateNextState();
             return true;
         }
 
-        template<typename T>
-        bool calculateAndCommitNextState(T stimulusBegin, T stimulusEnd) {
+        template<typename Iterator>
+        bool calculateAndCommitNextState(Iterator stimulusBegin, Iterator stimulusEnd) {
             if (!calculateNextState(stimulusBegin, stimulusEnd))
                 return false;
             commitNextState();
