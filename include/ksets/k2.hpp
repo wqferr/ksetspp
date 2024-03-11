@@ -13,23 +13,10 @@ namespace ksets {
             checkWeights();
         }
 
-        K2Weights(std::array<numeric, 4> values) {
-            wee = values[0];
-            wei = values[1];
-            wie = values[2];
-            wii = values[3];
-            checkWeights();
-        }
-    private:
-        void checkWeights() {
-            if (wee < 0)
-                throw std::invalid_argument("Weight from excitatory to excitatory units cannot be negative");
-            if (wei < 0)
-                throw std::invalid_argument("Weight from excitatory to inhibitory units cannot be negative");
-            if (wie > 0)
-                throw std::invalid_argument("Weight from inhibitory to excitatory units cannot be positive");
-            if (wii > 0)
-                throw std::invalid_argument("Weight from inhibitory to inhibitory units cannot be positive");
+        K2Weights(std::array<numeric, 4> values): K2Weights(values[0], values[1], values[2], values[3]) {}
+
+        bool checkWeights() const {
+            return wee > 0 && wei > 0 && wie < 0 && wii < 0;
         }
     };
 
