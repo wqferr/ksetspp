@@ -23,7 +23,7 @@ int main(void) {
     auto rng = [&gen, &dist]() {return static_cast<ksets::numeric>(dist(gen));};
     K3 model(4, 3000, rng);
 
-    std::size_t fileHistSize = ksets::odeMillisecondsToIters(100);
+    std::size_t fileHistSize = ksets::odeMillisecondsToIters(50);
     std::ofstream ofs("data.csv");
     for (auto& node : model.getOlfactoryBulbPrimaryNodes())
         writeCsv(ofs, fileHistSize, *node);

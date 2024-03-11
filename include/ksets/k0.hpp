@@ -70,7 +70,7 @@ namespace ksets {
         std::optional<std::size_t> getId() noexcept { return id; }
 
         void setHistorySize(std::size_t nIter);
-        void setActivityTracking(std::size_t nIter);
+        void setActivityMonitoring(std::size_t nIter);
 
         std::map<const K0 *, std::shared_ptr<K0>> cloneSubgraph() const noexcept;
         void cloneSubgraph(std::map<const K0 *, std::shared_ptr<K0>>& partialMapping) const noexcept;

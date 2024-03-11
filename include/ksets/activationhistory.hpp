@@ -29,6 +29,7 @@ namespace ksets {
 
         void put(numeric value);
         numeric get(std::size_t offset) const;
+        void resize(std::size_t newSize);
 
         numeric variance() const;
         numeric variance(std::size_t window) const;

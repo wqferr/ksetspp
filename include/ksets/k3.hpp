@@ -119,7 +119,7 @@ namespace ksets {
 
         /// Number of latest iterations for which output nodes (primary and antipodal nodes of the olfactory bulb,
         /// layer 1 of K2 sets) variance and standard deviation will be tracked.
-        std::size_t outputNodeActivityTracking = 1'000;
+        std::size_t outputNodeActivityMonitoring = 1'000;
 
         /// Length of history tracking for non-output nodes. See outputHistorySize for more information.
         std::size_t nonOutputHistorySize = 100;

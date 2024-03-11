@@ -22,6 +22,10 @@ numeric ActivationHistory::get(std::size_t offset=0) const {
     return history.at(index);
 }
 
+void ActivationHistory::resize(std::size_t newSize) {
+    history.resize(newSize);
+}
+
 void ActivationHistory::initMonitoring() {
     assert(monitoredWindow.has_value());
     auto m = monitoredWindow.value();

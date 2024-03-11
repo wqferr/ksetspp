@@ -2,7 +2,8 @@
 #include <random>
 #include <sstream>
 
-using ksets::K0, ksets::K2, ksets::K2Layer, ksets::K3, ksets::K0Config, ksets::K3Config, ksets::numeric;
+using ksets::K0, ksets::K2, ksets::K2Layer, ksets::K3, ksets::K0Config;
+using ksets::K2Config, ksets::K3Config, ksets::numeric;
 
 namespace {
     std::function<numeric()> createGaussianRng(numeric stdDev) {
@@ -13,23 +14,37 @@ namespace {
     }
 
     K0Config ponConfig(const K3Config& k3config) {
-        K0Config k0config;
-        k0config.historySize = k3config.nonOutputHistorySize;
-        return k0config;
+        return {k3config.nonOutputHistorySize};
+    }
+
+    K2Config obConfig(const K3Config& k3config) {
+        auto k2config = k3config.OB_unitConfig;
+        k2config.k0config = {k3config.nonOutputHistorySize};
+        return k2config;
+    }
+
+    K2Config aonConfig(const K3Config& k3config) {
+        K2Config k2config = k3config.AON_unitConfig;
+        k2config.k0config = {k3config.nonOutputHistorySize};
+        return k2config;
+    }
+
+    K2Config pcConfig(const K3Config& k3config) {
+        K2Config k2config = k3config.PC_unitConfig;
+        k2config.k0config = {k3config.nonOutputHistorySize};
+        return k2config;
     }
 
     K0Config dpcConfig(const K3Config& k3config) {
-        K0Config k0config;
-        k0config.historySize = k3config.nonOutputHistorySize;
-        return k0config;
+        return {k3config.outputHistorySize};
     }
 }
 
 K3::K3(std::size_t olfactoryBulbNumUnits, numeric initialRestMilliseconds, std::function<numeric()> rng, ksets::K3Config config):
     primaryOlfactoryNerve(olfactoryBulbNumUnits, std::nullopt, ponConfig(config)),
-    olfactoryBulb(olfactoryBulbNumUnits, config.OB_unitConfig),
-    anteriorOlfactoryNucleus(config.AON_unitConfig),
-    prepiriformCortex(config.PC_unitConfig),
+    olfactoryBulb(olfactoryBulbNumUnits, obConfig(config)),
+    anteriorOlfactoryNucleus(aonConfig(config)),
+    prepiriformCortex(pcConfig(config)),
     deepPyramidCells(new K0(dpcConfig(config))),
     obPrimaryNodes(olfactoryBulbNumUnits),
     obAntipodalNodes(olfactoryBulbNumUnits)
@@ -44,8 +59,13 @@ K3::K3(std::size_t olfactoryBulbNumUnits, numeric initialRestMilliseconds, std::
     advanceAonNoise();
 
     cachePrimaryAndAntipodalOlfactoryBulbNodes();
+    for (auto unit : olfactoryBulb) {
+        unit.primaryNode()->setHistorySize(config.outputHistorySize);
+        unit.primaryNode()->setActivityMonitoring(config.outputNodeActivityMonitoring);
+        unit.antipodalNode()->setHistorySize(config.outputHistorySize);
+        unit.antipodalNode()->setActivityMonitoring(config.outputNodeActivityMonitoring);
+    }
 
-    // TODO: enable activity tracking in relevant nodes
     rest(initialRestMilliseconds);
 }
 

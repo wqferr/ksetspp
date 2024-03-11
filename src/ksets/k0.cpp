@@ -58,6 +58,14 @@ K0& K0::operator=(K0&& other) noexcept {
     // destructor for other (old *this) runs here
 }
 
+void K0::setHistorySize(std::size_t nIter) {
+    activationHistory.resize(nIter);
+}
+
+void K0::setActivityMonitoring(std::size_t nIter) {
+    activationHistory.setActivityMonitoring(nIter);
+}
+
 // translation unit "private" function
 namespace {
     void doCloneSubgraph(std::map<const K0 *, std::shared_ptr<K0>>& oldToNew, const K0 *current) noexcept {
