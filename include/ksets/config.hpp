@@ -6,7 +6,7 @@
 
 namespace ksets {
     typedef float numeric;
-    constexpr std::size_t HISTORY_SIZE = 20'000;
+    constexpr std::size_t DEFAULT_HISTORY_SIZE = 1'000;
     constexpr numeric DEFAULT_LEARN_RATE = 0.05;
 
     constexpr numeric ODE_STEP_SIZE = 0.5;

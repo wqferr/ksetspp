@@ -9,7 +9,7 @@ namespace ksets {
         std::vector<K2> units;
     public:
         // throws if nUnits is 0
-        K2Layer(std::size_t nUnits, const K2Weights intraUnitWeights);
+        explicit K2Layer(std::size_t nUnits, const K2Config intraUnitWeights);
 
         // why did I delete this?
         // K2Layer(const K2Layer&) = delete;

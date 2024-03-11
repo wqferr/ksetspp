@@ -19,6 +19,10 @@
 */
 
 namespace ksets {
+    struct K0Config {
+        std::size_t historySize = 100;
+    };
+
     class K0;
     class K0Collection;
 
@@ -49,14 +53,14 @@ namespace ksets {
         OdeState nextOdeState = {0, 0};
         ActivationHistory activationHistory;
 
-        std::optional<std::size_t> id = std::nullopt;
         std::optional<std::reference_wrapper<K0Collection>> collection = std::nullopt;
+        std::optional<std::size_t> id = std::nullopt;
 
         void swap(K0& other) noexcept;
     public:
-        K0() noexcept;
-        K0(K0Collection& collection, std::size_t id) noexcept;
-        K0(std::size_t id) noexcept;
+        explicit K0(K0Config config=K0Config()) noexcept;
+        explicit K0(K0Collection& collection, std::size_t id, K0Config config=K0Config()) noexcept;
+
         K0(const K0& other) noexcept;
         K0(K0&& other) noexcept;
         K0& operator=(const K0& other) noexcept;
@@ -64,6 +68,9 @@ namespace ksets {
 
         std::optional<std::reference_wrapper<K0Collection>> getCollection() noexcept { return collection; }
         std::optional<std::size_t> getId() noexcept { return id; }
+
+        void setHistorySize(std::size_t nIter);
+        void setActivityTracking(std::size_t nIter);
 
         std::map<const K0 *, std::shared_ptr<K0>> cloneSubgraph() const noexcept;
         void cloneSubgraph(std::map<const K0 *, std::shared_ptr<K0>>& partialMapping) const noexcept;
@@ -111,17 +118,15 @@ namespace ksets {
         std::vector<std::shared_ptr<K0>> nodes;
         std::optional<std::string> name;
 
-        void initNodes(std::size_t nNodes);
+        void initNodes(std::size_t nNodes, const K0Config& config);
     public:
         // throws if nNodes == 0
-        K0Collection(std::size_t nNodes);
-
-        // throws if nNodes == 0
-        K0Collection(std::size_t nNodes, std::string name);
+        explicit K0Collection(std::size_t nNodes, std::optional<std::string> name=std::nullopt, K0Config config=K0Config());
 
         K0Collection(const K0Collection& other) noexcept;
         ~K0Collection();
 
+        void setName(std::string name) { this->name = name; }
         std::optional<std::string>& getName() noexcept { return name; }
 
         std::size_t size() const noexcept;

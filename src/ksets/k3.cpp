@@ -1,7 +1,8 @@
 #include "ksets/k3.hpp"
 #include <random>
+#include <sstream>
 
-using ksets::K0, ksets::K2, ksets::K2Layer, ksets::K3, ksets::numeric;
+using ksets::K0, ksets::K2, ksets::K2Layer, ksets::K3, ksets::K0Config, ksets::K3Config, ksets::numeric;
 
 namespace {
     std::function<numeric()> createGaussianRng(numeric stdDev) {
@@ -10,30 +11,45 @@ namespace {
         std::normal_distribution<numeric> dist {0.00, stdDev};
         return [=]() mutable {return dist(engine);};
     }
+
+    K0Config ponConfig(const K3Config& k3config) {
+        K0Config k0config;
+        k0config.historySize = k3config.nonOutputHistorySize;
+        return k0config;
+    }
+
+    K0Config dpcConfig(const K3Config& k3config) {
+        K0Config k0config;
+        k0config.historySize = k3config.nonOutputHistorySize;
+        return k0config;
+    }
 }
 
-explicit K3::K3(std::size_t olfactoryBulbNumUnits, numeric initialRestMilliseconds, std::function<numeric()> rng, ksets::K3Config config):
-    primaryOlfactoryNerve(olfactoryBulbNumUnits),
-    olfactoryBulb(olfactoryBulbNumUnits, config.wOB_intra),
-    anteriorOlfactoryNucleus(config.wAON_intra),
-    prepiriformCortex(config.wPC_intra),
-    deepPyramidCells(new K0(olfactoryBulbNumUnits))
+K3::K3(std::size_t olfactoryBulbNumUnits, numeric initialRestMilliseconds, std::function<numeric()> rng, ksets::K3Config config):
+    primaryOlfactoryNerve(olfactoryBulbNumUnits, std::nullopt, ponConfig(config)),
+    olfactoryBulb(olfactoryBulbNumUnits, config.OB_unitConfig),
+    anteriorOlfactoryNucleus(config.AON_unitConfig),
+    prepiriformCortex(config.PC_unitConfig),
+    deepPyramidCells(new K0(dpcConfig(config))),
+    obPrimaryNodes(olfactoryBulbNumUnits),
+    obAntipodalNodes(olfactoryBulbNumUnits)
 {
     if (!config.checkWeightsValidity())
         throw std::invalid_argument("One or more K3 weights were invalid.");
-    for (std::size_t i = 0; i < olfactoryBulbNumUnits; i++)
-        primaryOlfactoryNerve[i] = std::make_shared<K0>(i);
+    nameAllSubcomponents();
     connectAllSubcomponents(config);
     randomizeK0States(rng);
 
     aonStimulusRng = createGaussianRng(config.wAON_noise);
     advanceAonNoise();
 
+    cachePrimaryAndAntipodalOlfactoryBulbNodes();
+
     // TODO: enable activity tracking in relevant nodes
     rest(initialRestMilliseconds);
 }
 
-explicit K3::K3(std::size_t olfactoryBulbNumUnits, numeric initialRestMilliseconds, ksets::K3Config config)
+K3::K3(std::size_t olfactoryBulbNumUnits, numeric initialRestMilliseconds, ksets::K3Config config)
     : K3(
         olfactoryBulbNumUnits,
         initialRestMilliseconds,
@@ -41,7 +57,14 @@ explicit K3::K3(std::size_t olfactoryBulbNumUnits, numeric initialRestMillisecon
         config
     ) {}
 
-void K3::randomizeK0States(std::function<numeric()> rng) {
+void K3::cachePrimaryAndAntipodalOlfactoryBulbNodes() noexcept {
+    for (std::size_t i = 0; i < olfactoryBulb.size(); i++) {
+        obPrimaryNodes[i] = olfactoryBulb.unit(i).primaryNode();
+        obAntipodalNodes[i] = olfactoryBulb.unit(i).antipodalNode();
+    }
+}
+
+void K3::randomizeK0States(std::function<numeric()>& rng) noexcept {
     for (auto pnUnit : primaryOlfactoryNerve)
         pnUnit->randomizeState(rng);
     olfactoryBulb.randomizeK0States(rng);
@@ -74,7 +97,7 @@ void K3::calculateAndCommitNextState() noexcept {
     commitNextState();
 }
 
-void K3::advanceAonNoise() {
+void K3::advanceAonNoise() noexcept {
     anteriorOlfactoryNucleus.setExternalStimulus(aonStimulusRng());
 }
 
@@ -100,14 +123,25 @@ void K3::rest(numeric milliseconds) noexcept {
     run(milliseconds);
 }
 
-void K3::connectAllSubcomponents(const K3Config& config) {
+void K3::nameAllSubcomponents() noexcept {
+    primaryOlfactoryNerve.setName("Primary olfactory nerve (input layer)");
+    for (std::size_t i = 0; i < olfactoryBulb.size(); i++) {
+        std::stringstream unitName("Olfactory bulb (K2 layer 1) unit ");
+        unitName << i;
+        olfactoryBulb.unit(i).setName(unitName.str());
+    }
+    anteriorOlfactoryNucleus.setName("Anterior olfactory nucleus (K2 layer 2)");
+    prepiriformCortex.setName("Prepiriform cortex (K2 layer 3)");
+}
+
+void K3::connectAllSubcomponents(const K3Config& config) noexcept {
     connectPrimaryOlfactoryNerveLaterally(config.wPON_interUnit);
     olfactoryBulb.connectPrimaryNodes(config.wOB_inter[0]);
     olfactoryBulb.connectAntipodalNodes(config.wOB_inter[1]);
     connectLayers(config);
 }
 
-void K3::connectPrimaryOlfactoryNerveLaterally(numeric weight, std::size_t delay) {
+void K3::connectPrimaryOlfactoryNerveLaterally(numeric weight, std::size_t delay) noexcept {
     for (auto it1 = primaryOlfactoryNerve.begin(); it1 != primaryOlfactoryNerve.end(); it1++) {
         for (auto it2 = it1 + 1; it2 != primaryOlfactoryNerve.end(); it2++) {
             (*it1)->addInboundConnection(*it2, weight, delay);
@@ -116,7 +150,7 @@ void K3::connectPrimaryOlfactoryNerveLaterally(numeric weight, std::size_t delay
     }
 }
 
-void K3::connectLayers(const K3Config& config) {
+void K3::connectLayers(const K3Config& config) noexcept {
     auto pnIter = primaryOlfactoryNerve.begin();
     auto obIter = olfactoryBulb.begin();
     while (pnIter != primaryOlfactoryNerve.end()) {
@@ -146,10 +180,20 @@ void K3::connectLayers(const K3Config& config) {
         obUnit.antipodalNode()->addInboundConnection(
             deepPyramidCells, config.wDPC_OB_toAntipodal, config.dDPC_OB_toAntipodal);
 
+        pnIter++;
+        obIter++;
     }
     // Singled out connections, not part of any major chain
     anteriorOlfactoryNucleus.antipodalNode()->addInboundConnection(
         prepiriformCortex.primaryNode(),
         config.wPC_AON_toAntipodal,
         config.dPC_AON_toAntipodal);
+}
+
+const std::vector<std::shared_ptr<const K0>>& K3::getOlfactoryBulbPrimaryNodes() const noexcept {
+    return obPrimaryNodes;
+}
+
+const std::vector<std::shared_ptr<const K0>>& K3::getOlfactoryBulbAntipodalNodes() const noexcept {
+    return obAntipodalNodes;
 }

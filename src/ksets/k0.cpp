@@ -18,17 +18,20 @@ bool K0Connection::perturbWeight(numeric delta) noexcept {
 void K0::swap(K0& other) noexcept {
     activationHistory = std::exchange(other.activationHistory, activationHistory);
     inboundConnections = std::exchange(other.inboundConnections, inboundConnections);
+    // FIXME: hanging references that need outgoingConnections to be tracked
+    for (auto& connection : inboundConnections)
+        connection.target = std::addressof(other);
     odeState = std::exchange(other.odeState, odeState);
     nextOdeState = std::exchange(other.nextOdeState, nextOdeState);
     currentExternalStimulus = std::exchange(other.currentExternalStimulus, currentExternalStimulus);
     id.swap(other.id);
 }
 
-explicit K0::K0() noexcept: activationHistory(HISTORY_SIZE) {}
+K0::K0(K0Config config) noexcept:
+    activationHistory(config.historySize) {}
 
-explicit K0::K0(std::size_t id) noexcept: id(id) {}
-
-explicit K0::K0(K0Collection& collection, std::size_t id) noexcept: id(id), collection(collection) {}
+K0::K0(K0Collection& collection, std::size_t id, K0Config config) noexcept:
+    activationHistory(config.historySize), collection(collection), id(id) {}
 
 K0::K0(const K0& other) noexcept:
     activationHistory(other.activationHistory),
@@ -170,19 +173,20 @@ const ksets::ActivationHistory& K0::getActivationHistory() const noexcept {
     return activationHistory;
 }
 
-void K0Collection::initNodes(std::size_t nNodes) {
+void K0Collection::initNodes(std::size_t nNodes, const K0Config& config) {
     if (nNodes == 0)
         throw std::invalid_argument("Number of nodes cannot be 0");
     for (std::size_t i = 0; i < nNodes; i++)
-        nodes.push_back(std::make_shared<K0>(*this, i));
+        nodes.push_back(std::make_shared<K0>(*this, i, config));
 }
 
-explicit K0Collection::K0Collection(std::size_t nNodes): name(std::nullopt) {
-    initNodes(nNodes);
-}
-
-explicit K0Collection::K0Collection(std::size_t nNodes, std::string name): name(name) {
-    initNodes(nNodes);
+K0Collection::K0Collection(
+    std::size_t nNodes,
+    std::optional<std::string> name,
+    K0Config config
+) {
+    this->name.swap(name);
+    initNodes(nNodes, config);
 }
 
 K0Collection::K0Collection(const K0Collection& other) noexcept {

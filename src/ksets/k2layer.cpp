@@ -2,9 +2,9 @@
 
 using ksets::K2, ksets::K2Layer, ksets::numeric;
 
-explicit K2Layer::K2Layer(
+K2Layer::K2Layer(
     std::size_t nUnits,
-    const K2Weights intraUnitWeights
+    const K2Config intraUnitWeights
 )
     // : units(nUnits, K2(intraUnitWeights)) --> cant copy construct K2s
 {

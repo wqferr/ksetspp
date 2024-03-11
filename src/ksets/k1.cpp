@@ -6,8 +6,8 @@
 using ksets::K0, ksets::K1, ksets::numeric;
 
 // FIXME: I never actually use K1... Should I remove it?
-K1::K1(numeric wPrimarySecondary, numeric wSecondaryPrimary)
-    : K0Collection(2)
+K1::K1(numeric wPrimarySecondary, numeric wSecondaryPrimary):
+    K0Collection(2)
 {
     if (copysign(1.0, wPrimarySecondary) != copysign(1.0, wSecondaryPrimary))
         throw std::invalid_argument("Weights must both be positive or both be negative");

@@ -22,7 +22,7 @@ namespace ksets {
         void initMonitoring();
         void doMonitoring(numeric newestValue);
     public:
-        ActivationHistory(std::size_t historySize=HISTORY_SIZE);
+        ActivationHistory(std::size_t historySize=DEFAULT_HISTORY_SIZE);
 
         // pass 0 to disable
         void setActivityMonitoring(std::size_t windowSize);
@@ -48,6 +48,8 @@ namespace ksets {
         }
 
         auto tail(std::size_t n) const {
+            if (n > history.size())
+                throw std::invalid_argument("Tail length must be less than or equal to history size.");
             return end() - n;
         }
 

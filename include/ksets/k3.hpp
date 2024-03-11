@@ -97,20 +97,32 @@ namespace ksets {
         numeric wAON_noise = 0.10;
 
         /// Intra unit weights for each of the K2 sets in the olfactory bulb (OB, layer 1 of K2 sets).
-        /// See K2Weights for more information.
-        K2Weights wOB_intra = {1.8, 1.0, -2.0, -0.8};
+        /// Also controls history size for
+        /// See K2Config for more information.
+        K2Config OB_unitConfig = {1.8, 1.0, -2.0, -0.8};
 
         /// Inter unit weights between each pair of K2 sets in the olfactory bulb (OB, layer 1 of K2 sets).
         /// See K2Layer for more information.
         std::array<numeric, 2> wOB_inter = {0.15, -0.10};
 
         /// Intra unit weights for the single K2 set in the anterior olfactory nucleus (AON, layer 2 of K2 sets).
-        /// See K2Weights for more information.
-        K2Weights wAON_intra = {1.6, 1.6, -1.5, -2.0};
+        /// See K2Config for more information.
+        K2Config AON_unitConfig = {1.6, 1.6, -1.5, -2.0};
 
         /// Intra unit weights for the single K2 set in the prepiriform cortex (PC, layer 3 of K2 sets).
-        /// See K2Weights for more information.
-        K2Weights wPC_intra = {1.6, 1.9, -0.2, -1.0};
+        /// See K2Config for more information.
+        K2Config PC_unitConfig = {1.6, 1.9, -0.2, -1.0};
+
+        /// Length of history tracking for output nodes (primary and antipodal nodes of the olfactory bulb,
+        /// layer 1 of K2 sets).
+        std::size_t outputHistorySize = 5'000;
+
+        /// Number of latest iterations for which output nodes (primary and antipodal nodes of the olfactory bulb,
+        /// layer 1 of K2 sets) variance and standard deviation will be tracked.
+        std::size_t outputNodeActivityTracking = 1'000;
+
+        /// Length of history tracking for non-output nodes. See outputHistorySize for more information.
+        std::size_t nonOutputHistorySize = 100;
 
         K3Config() {
             // assert default weights are valid
@@ -121,7 +133,7 @@ namespace ksets {
             return pos(wPON_interUnit) && pos(wPON_OB) && pos(wOB_AON_lot) && pos(wOB_PC_lot)
                 && pos(wAON_PON_mot) && pos(wAON_OB_toAntipodal) && pos(wPC_AON_toAntipodal)
                 && neg(wPC_DPC) && pos(wDPC_PC) && pos(wDPC_OB_toAntipodal) && pos(wAON_noise)
-                && wOB_intra.checkWeights() && wAON_intra.checkWeights() && wPC_intra.checkWeights();
+                && OB_unitConfig.checkWeights() && AON_unitConfig.checkWeights() && PC_unitConfig.checkWeights();
         }
     private:
         bool pos(numeric value) const { return value > 0; }
@@ -129,24 +141,33 @@ namespace ksets {
     };
 
     class K3 {
-        std::vector<std::shared_ptr<K0>> primaryOlfactoryNerve;
+        K0Collection primaryOlfactoryNerve;
         K2Layer olfactoryBulb;
         K2 anteriorOlfactoryNucleus;
         K2 prepiriformCortex;
         std::shared_ptr<K0> deepPyramidCells;
+
         std::function<numeric()> aonStimulusRng;
+
+        // these 2 are redundant, just cached for easy retrieval of model output
+        std::vector<std::shared_ptr<const K0>> obPrimaryNodes;
+        std::vector<std::shared_ptr<const K0>> obAntipodalNodes;
 
         void connectPrimaryOlfactoryNerveLaterally(numeric weight, std::size_t delay=0) noexcept;
         void connectLayers(const K3Config& config) noexcept;
+
+        void nameAllSubcomponents() noexcept;
         void connectAllSubcomponents(const K3Config& config) noexcept;
 
-        void randomizeK0States(std::function<numeric()> rng) noexcept;
+        void randomizeK0States(std::function<numeric()>& rng) noexcept;
 
         void calculateNextState() noexcept;
         void commitNextState() noexcept;
         void calculateAndCommitNextState() noexcept;
 
         void eraseExternalStimulus() noexcept;
+
+        void cachePrimaryAndAntipodalOlfactoryBulbNodes() noexcept;
 
         template<typename Iterator>
         void setPattern(Iterator patternFirst, Iterator patternEnd) {
@@ -171,8 +192,8 @@ namespace ksets {
         void run(numeric milliseconds) noexcept;
 
     public:
-        K3(std::size_t olfactoryBulbNumUnits, numeric initialRestMilliseconds, K3Config config=K3Config());
-        K3(std::size_t olfactoryBulbNumUnits, numeric initialRestMilliseconds, std::function<numeric()> rng, K3Config config=K3Config());
+        explicit K3(std::size_t olfactoryBulbNumUnits, numeric initialRestMilliseconds, K3Config config=K3Config());
+        explicit K3(std::size_t olfactoryBulbNumUnits, numeric initialRestMilliseconds, std::function<numeric()> rng, K3Config config=K3Config());
 
         void rest(numeric milliseconds) noexcept;
 
@@ -181,5 +202,8 @@ namespace ksets {
             setPattern(patternFirst, patternLast);
             run(milliseconds);
         }
+
+        const std::vector<std::shared_ptr<const K0>>& getOlfactoryBulbPrimaryNodes() const noexcept;
+        const std::vector<std::shared_ptr<const K0>>& getOlfactoryBulbAntipodalNodes() const noexcept;
     };
 }

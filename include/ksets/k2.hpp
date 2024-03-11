@@ -5,15 +5,18 @@
 #include "ksets/k0.hpp"
 
 namespace ksets {
-    struct K2Weights {
+    struct K2Config {
         numeric wee, wei, wie, wii;
-        K2Weights(numeric wee, numeric wei, numeric wie, numeric wii)
-            : wee(wee), wei(wei), wie(wie), wii(wii)
+        K0Config k0config;
+
+        K2Config(numeric wee, numeric wei, numeric wie, numeric wii):
+            K2Config(std::array<numeric, 4>{wee, wei, wie, wii}) {}
+
+        K2Config(std::array<numeric, 4> weights, K0Config k0config=K0Config()):
+            wee(weights[0]), wei(weights[1]), wie(weights[2]), wii(weights[3]), k0config(k0config)
         {
             checkWeights();
         }
-
-        K2Weights(std::array<numeric, 4> values): K2Weights(values[0], values[1], values[2], values[3]) {}
 
         bool checkWeights() const {
             return wee > 0 && wei > 0 && wie < 0 && wii < 0;
@@ -22,7 +25,7 @@ namespace ksets {
 
     class K2: public K0Collection {
     public:
-        K2(const K2Weights weights) noexcept;
+        explicit K2(const K2Config config, std::optional<std::string> name=std::nullopt) noexcept;
         K2(const K2& other) noexcept;
 
         // TODO: if this gets readded to the spec, make it receive a std::function<numeric()> instead of
