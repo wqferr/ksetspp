@@ -59,7 +59,7 @@ K3::K3(std::size_t olfactoryBulbNumUnits, numeric initialRestMilliseconds, std::
     advanceAonNoise();
 
     cachePrimaryAndAntipodalOlfactoryBulbNodes();
-    for (auto unit : olfactoryBulb) {
+    for (auto& unit : olfactoryBulb) {
         unit.primaryNode()->setHistorySize(config.outputHistorySize);
         unit.primaryNode()->setActivityMonitoring(config.outputNodeActivityMonitoring);
         unit.antipodalNode()->setHistorySize(config.outputHistorySize);
