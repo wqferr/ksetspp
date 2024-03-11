@@ -5,6 +5,7 @@
 
 using ksets::K0, ksets::K1, ksets::numeric;
 
+// FIXME: I never actually use K1... Should I remove it?
 K1::K1(numeric wPrimarySecondary, numeric wSecondaryPrimary)
     : K0Collection(2)
 {

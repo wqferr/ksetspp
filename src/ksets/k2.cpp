@@ -4,7 +4,7 @@
 
 using ksets::K2, ksets::K2Weights, ksets::K0, ksets::numeric;
 
-K2::K2(const K2Weights weights) noexcept
+explicit K2::K2(const K2Weights weights) noexcept
     : K0Collection(4)
 {
     node(0)->addInboundConnection(node(1), weights.wee);

@@ -24,13 +24,11 @@ void K0::swap(K0& other) noexcept {
     id.swap(other.id);
 }
 
-K0::K0() noexcept: activationHistory(HISTORY_SIZE) {}
+explicit K0::K0() noexcept: activationHistory(HISTORY_SIZE) {}
 
-K0::K0(std::size_t id) noexcept: id(id) {}
+explicit K0::K0(std::size_t id) noexcept: id(id) {}
 
-K0::K0(K0Collection& collection, std::size_t id) noexcept: id(id), collection(collection) {
-
-}
+explicit K0::K0(K0Collection& collection, std::size_t id) noexcept: id(id), collection(collection) {}
 
 K0::K0(const K0& other) noexcept:
     activationHistory(other.activationHistory),
@@ -179,11 +177,11 @@ void K0Collection::initNodes(std::size_t nNodes) {
         nodes.push_back(std::make_shared<K0>(*this, i));
 }
 
-K0Collection::K0Collection(std::size_t nNodes): name(std::nullopt) {
+explicit K0Collection::K0Collection(std::size_t nNodes): name(std::nullopt) {
     initNodes(nNodes);
 }
 
-K0Collection::K0Collection(std::size_t nNodes, std::string name): name(name) {
+explicit K0Collection::K0Collection(std::size_t nNodes, std::string name): name(name) {
     initNodes(nNodes);
 }
 

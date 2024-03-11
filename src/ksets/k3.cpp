@@ -2,7 +2,7 @@
 
 using ksets::K0, ksets::K2, ksets::K2Layer, ksets::K3, ksets::numeric;
 
-K3::K3(std::size_t olfactoryBulbNumUnits, ksets::K3Config config):
+explicit K3::K3(std::size_t olfactoryBulbNumUnits, ksets::K3Config config):
     primaryOlfactoryNerve(olfactoryBulbNumUnits),
     olfactoryBulb(olfactoryBulbNumUnits, config.wOB_intra),
     anteriorOlfactoryNucleus(config.wAON_intra),

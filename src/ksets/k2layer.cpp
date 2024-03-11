@@ -2,7 +2,7 @@
 
 using ksets::K2, ksets::K2Layer, ksets::numeric;
 
-K2Layer::K2Layer(
+explicit K2Layer::K2Layer(
     std::size_t nUnits,
     const K2Weights intraUnitWeights
 )
