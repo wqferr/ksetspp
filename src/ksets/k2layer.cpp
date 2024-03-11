@@ -17,13 +17,10 @@ K2Layer::K2Layer(
 bool K2Layer::connectPrimaryNodes(numeric weight, std::size_t delay) noexcept {
     if (weight < 0) return false;
     if (size() > 1) weight /= size() - 1;
-    auto it1 = begin();
-    for (auto it1 = begin(); it1 < end(); it1++) {
-        auto it2 = it1 + 1;
-        while (it2 < end()) {
+    for (auto it1 = begin(); it1 != end(); it1++) {
+        for (auto it2 = it1 + 1; it2 != end(); it2++) {
             it1->primaryNode()->addInboundConnection(it2->primaryNode(), weight, delay);
             it2->primaryNode()->addInboundConnection(it1->primaryNode(), weight, delay);
-            it2++;
         }
     }
     return true;
@@ -32,13 +29,10 @@ bool K2Layer::connectPrimaryNodes(numeric weight, std::size_t delay) noexcept {
 bool K2Layer::connectAntipodalNodes(numeric weight, std::size_t delay) noexcept {
     if (weight > 0) return false;
     if (size() > 1) weight /= size() - 1;
-    auto it1 = begin();
-    for (auto it1 = begin(); it1 < end(); it1++) {
-        auto it2 = it1 + 1;
-        while (it2 < end()) {
+    for (auto it1 = begin(); it1 != end(); it1++) {
+        for (auto it2 = it1 + 1; it2 != end(); it2++) {
             it1->antipodalNode()->addInboundConnection(it2->antipodalNode(), weight, delay);
             it2->antipodalNode()->addInboundConnection(it1->antipodalNode(), weight, delay);
-            it2++;
         }
     }
     return true;

@@ -15,8 +15,8 @@ namespace ksets {
         // K2Layer(const K2Layer&) = delete;
 
         // these return true if weight was valid => operation succeeded
-        bool connectPrimaryNodes(numeric interUnitWeight, std::size_t delay) noexcept;
-        bool connectAntipodalNodes(numeric interUnitWeight, std::size_t delay) noexcept;
+        bool connectPrimaryNodes(numeric interUnitWeight, std::size_t delay=0) noexcept;
+        bool connectAntipodalNodes(numeric interUnitWeight, std::size_t delay=0) noexcept;
 
         std::size_t size() const noexcept;
 
