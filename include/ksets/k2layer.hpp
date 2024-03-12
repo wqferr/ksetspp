@@ -7,16 +7,23 @@
 namespace ksets {
     class K2Layer {
         std::vector<K2> units;
+        ActivationHistory avgPrimaryActivation;
+        ActivationHistory avgAntipodalActivation;
     public:
         // throws if nUnits is 0
-        explicit K2Layer(std::size_t nUnits, const K2Config intraUnitWeights);
-
-        // why did I delete this?
-        // K2Layer(const K2Layer&) = delete;
+        explicit K2Layer(std::size_t nUnits, K2Config k2config);
 
         // these return true if weight was valid => operation succeeded
-        bool connectPrimaryNodes(numeric interUnitWeight, std::size_t delay=0) noexcept;
-        bool connectAntipodalNodes(numeric interUnitWeight, std::size_t delay=0) noexcept;
+        bool connectPrimaryNodesLaterally(numeric interUnitWeight, std::size_t delay=0) noexcept;
+        bool connectAntipodalNodesLaterally(numeric interUnitWeight, std::size_t delay=0) noexcept;
+
+        void setPrimaryActivationHistorySize(std::size_t newSize);
+        void setAntipodalActivationHistorySize(std::size_t newSize);
+        void setPrimaryActivityMonitoring(std::size_t newSize);
+        void setAntipodalActivityMonitoring(std::size_t newSize);
+
+        const ActivationHistory& getAveragePrimaryActivationHistory() const noexcept;
+        const ActivationHistory& getAverageAntipodalActivationHistory() const noexcept;
 
         std::size_t size() const noexcept;
 

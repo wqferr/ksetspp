@@ -1,20 +1,21 @@
 #include "ksets/k2layer.hpp"
 
-using ksets::K2, ksets::K2Layer, ksets::numeric;
+using ksets::K2, ksets::K2Layer, ksets::ActivationHistory, ksets::numeric;
 
 K2Layer::K2Layer(
     std::size_t nUnits,
-    const K2Config intraUnitWeights
-)
-    // : units(nUnits, K2(intraUnitWeights)) --> cant copy construct K2s
+    K2Config k2config
+):
+    avgPrimaryActivation(k2config.k0config.historySize),
+    avgAntipodalActivation(k2config.k0config.historySize)
 {
     if (nUnits == 0)
         throw std::invalid_argument("Number of units cannot be 0");
     for (std::size_t i = 0; i < nUnits; i++)
-        units.emplace_back(intraUnitWeights);
+        units.emplace_back(k2config);
 }
 
-bool K2Layer::connectPrimaryNodes(numeric weight, std::size_t delay) noexcept {
+bool K2Layer::connectPrimaryNodesLaterally(numeric weight, std::size_t delay) noexcept {
     if (weight < 0) return false;
     if (size() > 1) weight /= size() - 1;
     for (auto it1 = begin(); it1 != end(); it1++) {
@@ -26,7 +27,7 @@ bool K2Layer::connectPrimaryNodes(numeric weight, std::size_t delay) noexcept {
     return true;
 }
 
-bool K2Layer::connectAntipodalNodes(numeric weight, std::size_t delay) noexcept {
+bool K2Layer::connectAntipodalNodesLaterally(numeric weight, std::size_t delay) noexcept {
     if (weight > 0) return false;
     if (size() > 1) weight /= size() - 1;
     for (auto it1 = begin(); it1 != end(); it1++) {
@@ -36,6 +37,38 @@ bool K2Layer::connectAntipodalNodes(numeric weight, std::size_t delay) noexcept 
         }
     }
     return true;
+}
+
+void K2Layer::setPrimaryActivationHistorySize(std::size_t newSize) {
+    avgPrimaryActivation.resize(newSize);
+    for (auto& unit : *this)
+        unit.primaryNode()->setHistorySize(newSize);
+}
+
+void K2Layer::setAntipodalActivationHistorySize(std::size_t newSize) {
+    avgAntipodalActivation.resize(newSize);
+    for (auto& unit : *this)
+        unit.antipodalNode()->setHistorySize(newSize);
+}
+
+void K2Layer::setPrimaryActivityMonitoring(std::size_t newSize) {
+    avgPrimaryActivation.setActivityMonitoring(newSize);
+    for (auto& unit : *this)
+        unit.primaryNode()->setActivityMonitoring(newSize);
+}
+
+void K2Layer::setAntipodalActivityMonitoring(std::size_t newSize) {
+    avgAntipodalActivation.setActivityMonitoring(newSize);
+    for (auto& unit : *this)
+        unit.antipodalNode()->setActivityMonitoring(newSize);
+}
+
+const ActivationHistory& K2Layer::getAveragePrimaryActivationHistory() const noexcept {
+    return avgPrimaryActivation;
+}
+
+const ActivationHistory& K2Layer::getAverageAntipodalActivationHistory() const noexcept {
+    return avgAntipodalActivation;
 }
 
 std::size_t K2Layer::size() const noexcept {
@@ -64,8 +97,15 @@ bool K2Layer::calculateNextState(std::initializer_list<numeric> newExternalStimu
 }
 
 void K2Layer::commitNextState() noexcept {
-    for (auto& unit : units)
+    numeric primarySum = 0;
+    numeric antipodalSum = 0;
+    for (auto& unit : units) {
         unit.commitNextState();
+        primarySum += unit.primaryNode()->getActivationHistory().get(0);
+        antipodalSum += unit.antipodalNode()->getActivationHistory().get(0);
+    }
+    avgPrimaryActivation.put(primarySum / size());
+    avgAntipodalActivation.put(antipodalSum / size());
 }
 
 void K2Layer::calculateAndCommitNextState() noexcept {

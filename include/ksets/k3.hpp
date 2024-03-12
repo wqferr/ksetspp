@@ -85,7 +85,7 @@ namespace ksets {
         /// of K2 sets). It connects the single K0 set of DPC to all antipodal K0 sets in OB. Must be positive.
         /// THIS DEFAULT VALUE IS A GUESS! I DON'T KNOW THE ACTUAL VALUES OF THIS WEIGHT OR DELAY WITHOUT
         /// ACCESS TO THE ARTICLE.
-        numeric wDPC_OB_toAntipodal = 0.50;
+        numeric wDPC_OB_toAntipodal = 1.00;
 
         /// Delay for wDPC_OB_toAntipodal. See wDPC_OB_toAntipodal for more information.
         std::size_t dDPC_OB_toAntipodal = 40;
@@ -99,7 +99,7 @@ namespace ksets {
         /// Intra unit weights for each of the K2 sets in the olfactory bulb (OB, layer 1 of K2 sets).
         /// Also controls history size for
         /// See K2Config for more information.
-        K2Config OB_unitConfig = {1.8, 1.0, -2.0, -0.8};
+        K2Config wOB_unitConfig = {1.8, 1.0, -2.0, -0.8};
 
         /// Inter unit weights between each pair of K2 sets in the olfactory bulb (OB, layer 1 of K2 sets).
         /// See K2Layer for more information.
@@ -107,15 +107,16 @@ namespace ksets {
 
         /// Intra unit weights for the single K2 set in the anterior olfactory nucleus (AON, layer 2 of K2 sets).
         /// See K2Config for more information.
-        K2Config AON_unitConfig = {1.6, 1.6, -1.5, -2.0};
+        K2Config wAON_unitConfig = {1.6, 1.6, -1.5, -2.0};
 
         /// Intra unit weights for the single K2 set in the prepiriform cortex (PC, layer 3 of K2 sets).
         /// See K2Config for more information.
-        K2Config PC_unitConfig = {1.6, 1.9, -0.2, -1.0};
+        K2Config wPC_unitConfig = {1.6, 1.9, -0.2, -1.0};
 
+        // TODO: switch these numbers to length in milliseconds
         /// Length of history tracking for output nodes (primary and antipodal nodes of the olfactory bulb,
         /// layer 1 of K2 sets).
-        std::size_t outputHistorySize = 5'000;
+        std::size_t outputHistorySize = 20'000;
 
         /// Number of latest iterations for which output nodes (primary and antipodal nodes of the olfactory bulb,
         /// layer 1 of K2 sets) variance and standard deviation will be tracked.
@@ -133,7 +134,7 @@ namespace ksets {
             return pos(wPON_interUnit) && pos(wPON_OB) && pos(wOB_AON_lot) && pos(wOB_PC_lot)
                 && pos(wAON_PON_mot) && pos(wAON_OB_toAntipodal) && pos(wPC_AON_toAntipodal)
                 && neg(wPC_DPC) && pos(wDPC_PC) && pos(wDPC_OB_toAntipodal) && pos(wAON_noise)
-                && OB_unitConfig.checkWeights() && AON_unitConfig.checkWeights() && PC_unitConfig.checkWeights();
+                && wOB_unitConfig.checkWeights() && wAON_unitConfig.checkWeights() && wPC_unitConfig.checkWeights();
         }
     private:
         bool pos(numeric value) const { return value > 0; }
@@ -205,6 +206,7 @@ namespace ksets {
 
         const std::vector<std::shared_ptr<const K0>>& getOlfactoryBulbPrimaryNodes() const noexcept;
         const std::vector<std::shared_ptr<const K0>>& getOlfactoryBulbAntipodalNodes() const noexcept;
+        const K2Layer& getOlfactoryBulb() const noexcept;
         const std::shared_ptr<const K0> getDeepPyramidCells() const noexcept;
     };
 }

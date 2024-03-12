@@ -18,19 +18,19 @@ namespace {
     }
 
     K2Config obConfig(const K3Config& k3config) {
-        auto k2config = k3config.OB_unitConfig;
+        auto k2config = k3config.wOB_unitConfig;
         k2config.k0config = {k3config.nonOutputHistorySize};
         return k2config;
     }
 
     K2Config aonConfig(const K3Config& k3config) {
-        K2Config k2config = k3config.AON_unitConfig;
+        K2Config k2config = k3config.wAON_unitConfig;
         k2config.k0config = {k3config.nonOutputHistorySize};
         return k2config;
     }
 
     K2Config pcConfig(const K3Config& k3config) {
-        K2Config k2config = k3config.PC_unitConfig;
+        K2Config k2config = k3config.wPC_unitConfig;
         k2config.k0config = {k3config.nonOutputHistorySize};
         return k2config;
     }
@@ -59,12 +59,10 @@ K3::K3(std::size_t olfactoryBulbNumUnits, numeric initialRestMilliseconds, std::
     advanceAonNoise();
 
     cachePrimaryAndAntipodalOlfactoryBulbNodes();
-    for (auto& unit : olfactoryBulb) {
-        unit.primaryNode()->setHistorySize(config.outputHistorySize);
-        unit.primaryNode()->setActivityMonitoring(config.outputNodeActivityMonitoring);
-        unit.antipodalNode()->setHistorySize(config.outputHistorySize);
-        unit.antipodalNode()->setActivityMonitoring(config.outputNodeActivityMonitoring);
-    }
+    olfactoryBulb.setPrimaryActivationHistorySize(config.outputHistorySize);
+    olfactoryBulb.setPrimaryActivityMonitoring(config.outputNodeActivityMonitoring);
+    olfactoryBulb.setAntipodalActivationHistorySize(config.outputHistorySize);
+    olfactoryBulb.setAntipodalActivityMonitoring(config.outputNodeActivityMonitoring);
 
     rest(initialRestMilliseconds);
 }
@@ -94,6 +92,7 @@ void K3::randomizeK0States(std::function<numeric()>& rng) noexcept {
 }
 
 void K3::calculateNextState() noexcept {
+    // TODO: add noise to input nodes
     for (auto pnUnit : primaryOlfactoryNerve)
         pnUnit->calculateNextState();
     olfactoryBulb.calculateNextState();
@@ -156,8 +155,8 @@ void K3::nameAllSubcomponents() noexcept {
 
 void K3::connectAllSubcomponents(const K3Config& config) noexcept {
     connectPrimaryOlfactoryNerveLaterally(config.wPON_interUnit);
-    olfactoryBulb.connectPrimaryNodes(config.wOB_inter[0]);
-    olfactoryBulb.connectAntipodalNodes(config.wOB_inter[1]);
+    olfactoryBulb.connectPrimaryNodesLaterally(config.wOB_inter[0]);
+    olfactoryBulb.connectAntipodalNodesLaterally(config.wOB_inter[1]);
     connectLayers(config);
 }
 
@@ -221,6 +220,10 @@ void K3::connectLayers(const K3Config& config) noexcept {
         deepPyramidCells,
         config.wDPC_PC,
         config.dDPC_PC);
+}
+
+const K2Layer& K3::getOlfactoryBulb() const noexcept {
+    return olfactoryBulb;
 }
 
 const std::vector<std::shared_ptr<const K0>>& K3::getOlfactoryBulbPrimaryNodes() const noexcept {
