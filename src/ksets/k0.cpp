@@ -174,14 +174,15 @@ void K0::commitNextState() noexcept {
 }
 
 void K0::pushOutputToHistory() noexcept {
-    // TODO: FIXME:
-    // Do inhibitory nodes naturally inhabit the negative half of the sigmoid?
-    // THIS IS HUGE. This requires a huge refactor if so.
     activationHistory.put(ksets::sigmoid(odeState[0]));
 }
 
 const ksets::ActivationHistory& K0::getActivationHistory() const noexcept {
     return activationHistory;
+}
+
+void K0::randomizeState(std::function<numeric()>& rng) noexcept {
+    odeState[0] = rng();
 }
 
 void K0Collection::initNodes(std::size_t nNodes, const K0Config& config) {
@@ -255,7 +256,7 @@ void K0Collection::calculateAndCommitNextState(numeric newExternalStimulus) noex
     commitNextState();
 }
 
-void K0Collection::randomizeK0States(const std::function<numeric()>& rng) {
+void K0Collection::randomizeK0States(std::function<numeric()>& rng) {
     for (auto& k0 : nodes)
         k0->randomizeState(rng);
 }

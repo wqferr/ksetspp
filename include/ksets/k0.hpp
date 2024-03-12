@@ -88,6 +88,8 @@ namespace ksets {
         void calculateAndCommitNextState() noexcept;
         void calculateAndCommitNextState(numeric newExternalStimulus) noexcept;
 
+        void randomizeState(std::function<numeric()>& rng) noexcept;
+
         const ActivationHistory& getActivationHistory() const noexcept;
 
         auto iterInboundConnections() noexcept {
@@ -106,12 +108,6 @@ namespace ksets {
             return inboundConnections.end();
 
         }
-
-        template<typename RNG>
-        void randomizeState(RNG& rng) {
-            odeState[0] = rng();
-        }
-
     };
 
     class K0Collection {
@@ -163,6 +159,6 @@ namespace ksets {
         void calculateAndCommitNextState() noexcept;
         void calculateAndCommitNextState(numeric newExternalStimulus) noexcept;
 
-        void randomizeK0States(const std::function<numeric()>& rng);
+        void randomizeK0States(std::function<numeric()>& rng);
     };
 }

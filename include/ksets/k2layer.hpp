@@ -93,6 +93,6 @@ namespace ksets {
             return true;
         }
 
-        void randomizeK0States(const std::function<numeric()>& rng);
+        void randomizeK0States(std::function<numeric()>& rng);
     };
 }
