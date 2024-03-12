@@ -174,6 +174,9 @@ void K0::commitNextState() noexcept {
 }
 
 void K0::pushOutputToHistory() noexcept {
+    // TODO: FIXME:
+    // Do inhibitory nodes naturally inhabit the negative half of the sigmoid?
+    // THIS IS HUGE. This requires a huge refactor if so.
     activationHistory.put(ksets::sigmoid(odeState[0]));
 }
 
