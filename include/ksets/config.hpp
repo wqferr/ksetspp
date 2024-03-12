@@ -13,6 +13,9 @@ namespace ksets {
     constexpr std::size_t odeMillisecondsToIters(numeric milliseconds) {
         return std::ceil(milliseconds / ODE_STEP_SIZE);
     }
+    constexpr numeric odeItersToMilliseconds(std::size_t nIter) {
+        return nIter * ODE_STEP_SIZE;
+    }
 
     constexpr numeric ODE_A_DECAY_RATE = 0.22;
     constexpr numeric ODE_B_RISE_RATE = 0.72;

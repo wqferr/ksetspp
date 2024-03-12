@@ -78,8 +78,8 @@ namespace ksets {
         void addInboundConnection(std::shared_ptr<K0> source, numeric weight, std::size_t delay=0) noexcept;
         void clearInboundConnections() noexcept;
 
-        numeric getCurrentOutput() const noexcept;
-        numeric getDelayedOutput(std::size_t delay) const noexcept;
+        numeric getCurrentSigmoidOutput() const noexcept;
+        numeric getDelayedSigmoidOutput(std::size_t delay) const noexcept;
 
         void setExternalStimulus(numeric newExternalStimulus) noexcept;
         void calculateNextState() noexcept;

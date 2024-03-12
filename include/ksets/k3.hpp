@@ -120,7 +120,7 @@ namespace ksets {
 
         /// Number of latest iterations for which output nodes (primary and antipodal nodes of the olfactory bulb,
         /// layer 1 of K2 sets) variance and standard deviation will be tracked.
-        std::size_t outputNodeActivityMonitoring = 1'000;
+        std::size_t outputActivityMonitoring = 1'000;
 
         /// Length of history tracking for non-output nodes. See outputHistorySize for more information.
         std::size_t nonOutputHistorySize = 100;
@@ -207,6 +207,7 @@ namespace ksets {
         const std::vector<std::shared_ptr<const K0>>& getOlfactoryBulbPrimaryNodes() const noexcept;
         const std::vector<std::shared_ptr<const K0>>& getOlfactoryBulbAntipodalNodes() const noexcept;
         const K2Layer& getOlfactoryBulb() const noexcept;
+        const std::shared_ptr<const K0> getPrepiriformCortexPrimary() const noexcept;
         const std::shared_ptr<const K0> getDeepPyramidCells() const noexcept;
     };
 }

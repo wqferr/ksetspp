@@ -59,10 +59,12 @@ K3::K3(std::size_t olfactoryBulbNumUnits, numeric initialRestMilliseconds, std::
     advanceAonNoise();
 
     cachePrimaryAndAntipodalOlfactoryBulbNodes();
-    olfactoryBulb.setPrimaryActivationHistorySize(config.outputHistorySize);
-    olfactoryBulb.setPrimaryActivityMonitoring(config.outputNodeActivityMonitoring);
-    olfactoryBulb.setAntipodalActivationHistorySize(config.outputHistorySize);
-    olfactoryBulb.setAntipodalActivityMonitoring(config.outputNodeActivityMonitoring);
+    olfactoryBulb.setPrimaryHistorySize(config.outputHistorySize);
+    olfactoryBulb.setPrimaryActivityMonitoring(config.outputActivityMonitoring);
+    olfactoryBulb.setAntipodalHistorySize(config.outputHistorySize);
+    olfactoryBulb.setAntipodalActivityMonitoring(config.outputActivityMonitoring);
+    prepiriformCortex.primaryNode()->setHistorySize(config.outputHistorySize);
+    prepiriformCortex.primaryNode()->setActivityMonitoring(config.outputActivityMonitoring);
 
     rest(initialRestMilliseconds);
 }
@@ -233,6 +235,11 @@ const std::vector<std::shared_ptr<const K0>>& K3::getOlfactoryBulbPrimaryNodes()
 const std::vector<std::shared_ptr<const K0>>& K3::getOlfactoryBulbAntipodalNodes() const noexcept {
     return obAntipodalNodes;
 }
+
+const std::shared_ptr<const K0> K3::getPrepiriformCortexPrimary() const noexcept {
+    return prepiriformCortex.primaryNode();
+}
+
 
 const std::shared_ptr<const K0> K3::getDeepPyramidCells() const noexcept {
     return deepPyramidCells;

@@ -39,13 +39,13 @@ bool K2Layer::connectAntipodalNodesLaterally(numeric weight, std::size_t delay) 
     return true;
 }
 
-void K2Layer::setPrimaryActivationHistorySize(std::size_t newSize) {
+void K2Layer::setPrimaryHistorySize(std::size_t newSize) {
     avgPrimaryActivation.resize(newSize);
     for (auto& unit : *this)
         unit.primaryNode()->setHistorySize(newSize);
 }
 
-void K2Layer::setAntipodalActivationHistorySize(std::size_t newSize) {
+void K2Layer::setAntipodalHistorySize(std::size_t newSize) {
     avgAntipodalActivation.resize(newSize);
     for (auto& unit : *this)
         unit.antipodalNode()->setHistorySize(newSize);

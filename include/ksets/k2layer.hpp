@@ -17,8 +17,8 @@ namespace ksets {
         bool connectPrimaryNodesLaterally(numeric interUnitWeight, std::size_t delay=0) noexcept;
         bool connectAntipodalNodesLaterally(numeric interUnitWeight, std::size_t delay=0) noexcept;
 
-        void setPrimaryActivationHistorySize(std::size_t newSize);
-        void setAntipodalActivationHistorySize(std::size_t newSize);
+        void setPrimaryHistorySize(std::size_t newSize);
+        void setAntipodalHistorySize(std::size_t newSize);
         void setPrimaryActivityMonitoring(std::size_t newSize);
         void setAntipodalActivityMonitoring(std::size_t newSize);
 
