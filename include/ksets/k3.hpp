@@ -205,5 +205,6 @@ namespace ksets {
 
         const std::vector<std::shared_ptr<const K0>>& getOlfactoryBulbPrimaryNodes() const noexcept;
         const std::vector<std::shared_ptr<const K0>>& getOlfactoryBulbAntipodalNodes() const noexcept;
+        const std::shared_ptr<const K0> getDeepPyramidCells() const noexcept;
     };
 }

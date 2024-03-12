@@ -203,11 +203,24 @@ void K3::connectLayers(const K3Config& config) noexcept {
         pnIter++;
         obIter++;
     }
+
     // Singled out connections, not part of any major chain
     anteriorOlfactoryNucleus.antipodalNode()->addInboundConnection(
         prepiriformCortex.primaryNode(),
         config.wPC_AON_toAntipodal,
         config.dPC_AON_toAntipodal);
+
+    // Prepiriform cortex -> deep pyramid cells
+    deepPyramidCells->addInboundConnection(
+        prepiriformCortex.antipodalNode(),
+        config.wPC_DPC,
+        config.dPC_DPC);
+
+    // Deep pyramid cells -> prepiriform cortex
+    prepiriformCortex.antipodalNode()->addInboundConnection(
+        deepPyramidCells,
+        config.wDPC_PC,
+        config.dDPC_PC);
 }
 
 const std::vector<std::shared_ptr<const K0>>& K3::getOlfactoryBulbPrimaryNodes() const noexcept {
@@ -216,4 +229,8 @@ const std::vector<std::shared_ptr<const K0>>& K3::getOlfactoryBulbPrimaryNodes()
 
 const std::vector<std::shared_ptr<const K0>>& K3::getOlfactoryBulbAntipodalNodes() const noexcept {
     return obAntipodalNodes;
+}
+
+const std::shared_ptr<const K0> K3::getDeepPyramidCells() const noexcept {
+    return deepPyramidCells;
 }

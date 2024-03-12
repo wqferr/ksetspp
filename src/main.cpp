@@ -23,10 +23,15 @@ int main(void) {
     auto rng = [&gen, &dist]() {return static_cast<ksets::numeric>(dist(gen));};
     K3 model(4, 3000, rng);
 
-    std::size_t fileHistSize = 3000;
+    std::vector<ksets::numeric> pattern = {0, 1, 1, 0};
+    // model.present(2000, pattern.begin(), pattern.end());
+    model.rest(500);
+
+    std::size_t fileHistSize = 2000;
     std::ofstream ofs("data.csv");
-    for (auto& node : model.getOlfactoryBulbPrimaryNodes())
-        writeCsv(ofs, fileHistSize, *node);
-    for (auto& node : model.getOlfactoryBulbAntipodalNodes())
-        writeCsv(ofs, fileHistSize, *node);
+    writeCsv(ofs, fileHistSize, *model.getDeepPyramidCells());
+    // for (auto& node : model.getOlfactoryBulbPrimaryNodes())
+    //     writeCsv(ofs, fileHistSize, *node);
+    // for (auto& node : model.getOlfactoryBulbAntipodalNodes())
+    //     writeCsv(ofs, fileHistSize, *node);
 }
