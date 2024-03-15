@@ -12,20 +12,20 @@
 
 namespace ksets {
     struct K3Config {
-        /// Weight between primary olfactory nerve (PON, the input K0 array) units.
+        /// Weight between periglomerular (PG, the input K0 array) units.
         /// This will be divided by the number of units in the primary input nerve.
         /// Must be positive.
-        numeric wPON_interUnit = 0.10;
+        numeric wPG_interUnit = 0.10;
 
-        /// Delay for wPON_interUnit connection. See wPON_interUnit for more information.
-        std::size_t dPON_interUnit = 1;
+        /// Delay for wPG_interUnit connection. See wPG_interUnit for more information.
+        std::size_t dPG_interUnit = 1;
 
-        /// Weight between the primary olfactory nerve (PON, the input K0 array) and the
+        /// Weight between the periglomerular cells (PG, the input K0 array) and the
         /// excitatory K0 in the olfactory bulb (OB, layer 1 of K2 sets). Must be positive.
-        numeric wPON_OB = 1.00;
+        numeric wPG_OB = 1.00;
 
-        /// Delay for wPON_OB connection. See wPON_OB for more information.
-        std::size_t dPON_OB = 1;
+        /// Delay for wPG_OB connection. See wPG_OB for more information.
+        std::size_t dPG_OB = 1;
 
         /// Weight of the lateral olfactory tract (LOT) between the olfactory bulb (OB, layer 1 of K2 sets)
         /// and the anterior olfactory nucleus (AON, layer 2). It connects all primary K0 in OB to the single
@@ -44,12 +44,12 @@ namespace ksets {
         std::size_t dOB_PC_lot = 1;
 
         /// Weight of the medium olfactory tract (MOT) between the anterior olfactory nucleus (AON, layer 2 of K2 sets)
-        /// and the primary olfactory nerve (PON, the input K0 array). It connects the single primary K0 in AON to all
-        /// K0 in PON. Must be positive.
-        numeric wAON_PON_mot = 0.05;
+        /// and the periglomerular cells (PG, the input K0 array). It connects the single primary K0 in AON to all
+        /// K0 in PG. Must be positive.
+        numeric wAON_PG_mot = 0.05;
 
-        /// Delay for wAON_PON_mot. See wAON_PON_mot for more information.
-        std::size_t dAON_PON_mot = 17;
+        /// Delay for wAON_PG_mot. See wAON_PG_mot for more information.
+        std::size_t dAON_PG_mot = 17;
 
         /// Weight of the medium olfactory tract (MOT) between the anterior olfactory nucleus (AON, layer 2 of K2 sets)
         /// and the olfactory bulb (OB, layer 1 of K2 sets). It connects the single primary K0 in AON to all antipodal
@@ -85,7 +85,7 @@ namespace ksets {
         /// of K2 sets). It connects the single K0 set of DPC to all antipodal K0 sets in OB. Must be positive.
         /// THIS DEFAULT VALUE IS A GUESS! I DON'T KNOW THE ACTUAL VALUES OF THIS WEIGHT OR DELAY WITHOUT
         /// ACCESS TO THE ARTICLE.
-        numeric wDPC_OB_toAntipodal = 1.00;
+        numeric wDPC_OB_toAntipodal = 0.50;
 
         /// Delay for wDPC_OB_toAntipodal. See wDPC_OB_toAntipodal for more information.
         std::size_t dDPC_OB_toAntipodal = 40;
@@ -131,8 +131,8 @@ namespace ksets {
         }
 
         bool checkWeightsValidity() const {
-            return pos(wPON_interUnit) && pos(wPON_OB) && pos(wOB_AON_lot) && pos(wOB_PC_lot)
-                && pos(wAON_PON_mot) && pos(wAON_OB_toAntipodal) && pos(wPC_AON_toAntipodal)
+            return pos(wPG_interUnit) && pos(wPG_OB) && pos(wOB_AON_lot) && pos(wOB_PC_lot)
+                && pos(wAON_PG_mot) && pos(wAON_OB_toAntipodal) && pos(wPC_AON_toAntipodal)
                 && neg(wPC_DPC) && pos(wDPC_PC) && pos(wDPC_OB_toAntipodal) && pos(wAON_noise)
                 && wOB_unitConfig.checkWeights() && wAON_unitConfig.checkWeights() && wPC_unitConfig.checkWeights();
         }
@@ -142,7 +142,7 @@ namespace ksets {
     };
 
     class K3 {
-        K0Collection primaryOlfactoryNerve;
+        K0Collection periglomerularCells;
         K2Layer olfactoryBulb;
         K2 anteriorOlfactoryNucleus;
         K2 prepiriformCortex;
@@ -172,13 +172,13 @@ namespace ksets {
 
         template<typename Iterator>
         void setPattern(Iterator patternFirst, Iterator patternEnd) {
-            if (patternEnd - patternFirst != primaryOlfactoryNerve.size())
+            if (patternEnd - patternFirst != periglomerularCells.size())
                 throw std::invalid_argument("Pattern length does not match input layer size");
-            auto pnIter = primaryOlfactoryNerve.begin();
+            auto pnIter = periglomerularCells.begin();
             auto obIter = olfactoryBulb.begin();
             auto patternIter = patternFirst;
             while (patternIter != patternEnd) {
-                assert(pnIter != primaryOlfactoryNerve.end());
+                assert(pnIter != periglomerularCells.end());
                 assert(obIter != olfactoryBulb.end());
                 (*pnIter)->setExternalStimulus(*patternIter);
                 obIter->setExternalStimulus(*patternIter);

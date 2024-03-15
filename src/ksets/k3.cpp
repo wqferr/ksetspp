@@ -41,7 +41,7 @@ namespace {
 }
 
 K3::K3(std::size_t olfactoryBulbNumUnits, numeric initialRestMilliseconds, std::function<numeric()> rng, ksets::K3Config config):
-    primaryOlfactoryNerve(olfactoryBulbNumUnits, std::nullopt, ponConfig(config)),
+    periglomerularCells(olfactoryBulbNumUnits, std::nullopt, ponConfig(config)),
     olfactoryBulb(olfactoryBulbNumUnits, obConfig(config)),
     anteriorOlfactoryNucleus(aonConfig(config)),
     prepiriformCortex(pcConfig(config)),
@@ -85,7 +85,7 @@ void K3::cachePrimaryAndAntipodalOlfactoryBulbNodes() noexcept {
 }
 
 void K3::randomizeK0States(std::function<numeric()>& rng) noexcept {
-    for (auto pnUnit : primaryOlfactoryNerve)
+    for (auto pnUnit : periglomerularCells)
         pnUnit->randomizeState(rng);
     olfactoryBulb.randomizeK0States(rng);
     anteriorOlfactoryNucleus.randomizeK0States(rng);
@@ -95,7 +95,7 @@ void K3::randomizeK0States(std::function<numeric()>& rng) noexcept {
 
 void K3::calculateNextState() noexcept {
     // TODO: add noise to input nodes
-    for (auto pnUnit : primaryOlfactoryNerve)
+    for (auto pnUnit : periglomerularCells)
         pnUnit->calculateNextState();
     olfactoryBulb.calculateNextState();
     anteriorOlfactoryNucleus.calculateNextState();
@@ -104,7 +104,7 @@ void K3::calculateNextState() noexcept {
 }
 
 void K3::commitNextState() noexcept {
-    for (auto pnUnit : primaryOlfactoryNerve)
+    for (auto pnUnit : periglomerularCells)
         pnUnit->commitNextState();
     olfactoryBulb.commitNextState();
     anteriorOlfactoryNucleus.commitNextState();
@@ -123,9 +123,9 @@ void K3::advanceAonNoise() noexcept {
 }
 
 void K3::eraseExternalStimulus() noexcept {
-    auto pnIter = primaryOlfactoryNerve.begin();
+    auto pnIter = periglomerularCells.begin();
     auto obIter = olfactoryBulb.begin();
-    while (pnIter != primaryOlfactoryNerve.end()) {
+    while (pnIter != periglomerularCells.end()) {
         (*pnIter)->setExternalStimulus(0);
         obIter->setExternalStimulus(0);
         pnIter++;
@@ -145,7 +145,7 @@ void K3::rest(numeric milliseconds) noexcept {
 }
 
 void K3::nameAllSubcomponents() noexcept {
-    primaryOlfactoryNerve.setName("Primary olfactory nerve (input layer)");
+    periglomerularCells.setName("Primary olfactory nerve (input layer)");
     for (std::size_t i = 0; i < olfactoryBulb.size(); i++) {
         std::stringstream unitName("Olfactory bulb (K2 layer 1) unit ");
         unitName << i;
@@ -156,15 +156,15 @@ void K3::nameAllSubcomponents() noexcept {
 }
 
 void K3::connectAllSubcomponents(const K3Config& config) noexcept {
-    connectPrimaryOlfactoryNerveLaterally(config.wPON_interUnit);
+    connectPrimaryOlfactoryNerveLaterally(config.wPG_interUnit);
     olfactoryBulb.connectPrimaryNodesLaterally(config.wOB_inter[0]);
     olfactoryBulb.connectAntipodalNodesLaterally(config.wOB_inter[1]);
     connectLayers(config);
 }
 
 void K3::connectPrimaryOlfactoryNerveLaterally(numeric weight, std::size_t delay) noexcept {
-    for (auto it1 = primaryOlfactoryNerve.begin(); it1 != primaryOlfactoryNerve.end(); it1++) {
-        for (auto it2 = it1 + 1; it2 != primaryOlfactoryNerve.end(); it2++) {
+    for (auto it1 = periglomerularCells.begin(); it1 != periglomerularCells.end(); it1++) {
+        for (auto it2 = it1 + 1; it2 != periglomerularCells.end(); it2++) {
             (*it1)->addInboundConnection(*it2, weight, delay);
             (*it2)->addInboundConnection(*it1, weight, delay);
         }
@@ -172,9 +172,9 @@ void K3::connectPrimaryOlfactoryNerveLaterally(numeric weight, std::size_t delay
 }
 
 void K3::connectLayers(const K3Config& config) noexcept {
-    auto pnIter = primaryOlfactoryNerve.begin();
+    auto pnIter = periglomerularCells.begin();
     auto obIter = olfactoryBulb.begin();
-    while (pnIter != primaryOlfactoryNerve.end()) {
+    while (pnIter != periglomerularCells.end()) {
         assert(obIter != olfactoryBulb.end());
         auto pnUnit = *pnIter;
         auto obUnit = *obIter;
@@ -184,8 +184,8 @@ void K3::connectLayers(const K3Config& config) noexcept {
         // AON -> PON connections
         pnUnit->addInboundConnection(
             anteriorOlfactoryNucleus.primaryNode(),
-            config.wAON_PON_mot,
-            config.dAON_PON_mot);
+            config.wAON_PG_mot,
+            config.dAON_PG_mot);
 
         // LOT connections, left on the diagram
         anteriorOlfactoryNucleus.primaryNode()->addInboundConnection(
