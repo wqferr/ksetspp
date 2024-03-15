@@ -37,7 +37,7 @@ int main(void) {
     ksets::K3 model(4, 10000, rng);
 
     std::vector<ksets::numeric> pattern = {2, 1, 0, 3};
-    model.present(500, pattern.begin(), pattern.end());
+    model.present(200, pattern.begin(), pattern.end());
     model.rest(50);
 
     std::size_t fileHistSize = ksets::odeMillisecondsToIters(400);
@@ -47,6 +47,7 @@ int main(void) {
     // writeCsv(ofs, fileHistSize, *model.getPrepiriformCortexPrimary());
     for (auto& node : model.getOlfactoryBulbPrimaryNodes())
         writeCsv(ofs, fileHistSize, *node);
-    for (auto& node : model.getOlfactoryBulbAntipodalNodes())
-        writeCsv(ofs, fileHistSize, *node);
+    // writeCsv(ofs, fileHistSize, model.getOlfactoryBulb().getAveragePrimaryActivationHistory());
+    // for (auto& node : model.getOlfactoryBulbAntipodalNodes())
+    //     writeCsv(ofs, fileHistSize, *node);
 }
