@@ -176,8 +176,8 @@ void K3::connectLayers(const K3Config& config) noexcept {
     auto obIter = olfactoryBulb.begin();
     while (pnIter != periglomerularCells.end()) {
         assert(obIter != olfactoryBulb.end());
-        auto pnUnit = *pnIter;
-        auto obUnit = *obIter;
+        auto& pnUnit = *pnIter;
+        auto& obUnit = *obIter;
 
         obUnit.primaryNode()->addInboundConnection(pnUnit, 1.0, 0);
 
