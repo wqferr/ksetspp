@@ -23,7 +23,10 @@ namespace ksets {
     constexpr numeric SIGMOID_Q = 5;
 
     constexpr numeric sigmoid(numeric x) {
-        return SIGMOID_Q * (1 - std::exp(-(std::exp(x)-1) / SIGMOID_Q));
+        return std::max(
+            SIGMOID_Q * (1 - std::exp(-(std::exp(x)-1) / SIGMOID_Q)),
+            static_cast<numeric>(-1.0)
+        );
     }
 
     constexpr numeric defaultK3RandomK0InitializationStdDev = 0.02;
