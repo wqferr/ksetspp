@@ -15,7 +15,7 @@ namespace ksets {
         /// Weight between periglomerular (PG, the input K0 array) units.
         /// This will be divided by the number of units in the primary input nerve.
         /// Must be positive.
-        numeric wPG_interUnit = 0.10;
+        numeric wPG_interUnit = 0.90;
 
         /// Delay for wPG_interUnit connection. See wPG_interUnit for more information.
         std::size_t dPG_interUnit = 1;
