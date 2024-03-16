@@ -5,7 +5,7 @@
 #include <memory>
 #include <stdexcept>
 
-using ksets::K0, ksets::K0Connection, ksets::K0Collection, ksets::numeric;
+using ksets::K0, ksets::K0Connection, ksets::K0Collection, ksets::numeric, ksets::sigmoid;
 
 bool K0Connection::perturbWeight(numeric delta) noexcept {
     numeric newWeight = weight + delta;
@@ -99,7 +99,7 @@ void K0::cloneSubgraph(std::map<const K0 *, std::shared_ptr<K0>>& partialMapping
 numeric K0::calculateNetInput() noexcept {
     numeric accumulation = currentExternalStimulus;
     for (auto& connection : inboundConnections)
-        accumulation += connection.weight * connection.source->getDelayedSigmoidOutput(connection.delay);
+        accumulation += connection.weight * connection.source->getDelayedOutput(connection.delay);
     return accumulation;
 }
 
@@ -111,12 +111,12 @@ void K0::clearInboundConnections() noexcept {
     inboundConnections.clear();
 }
 
-numeric K0::getCurrentSigmoidOutput() const noexcept {
-    return getDelayedSigmoidOutput(0);
+numeric K0::getCurrentOutput() const noexcept {
+    return getDelayedOutput(0);
 }
 
-numeric K0::getDelayedSigmoidOutput(std::size_t delay) const noexcept {
-    return activationHistory.getSigmoid(delay);
+numeric K0::getDelayedOutput(std::size_t delay) const noexcept {
+    return activationHistory.get(delay);
 }
 
 void K0::setExternalStimulus(numeric newExternalStimulus) noexcept {
@@ -174,7 +174,7 @@ void K0::commitNextState() noexcept {
 }
 
 void K0::pushOutputToHistory() noexcept {
-    activationHistory.put(odeState[0]);
+    activationHistory.put(sigmoid(odeState[0]));
 }
 
 const ksets::ActivationHistory& K0::getActivationHistory() const noexcept {

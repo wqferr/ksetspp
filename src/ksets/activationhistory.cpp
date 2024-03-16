@@ -7,24 +7,19 @@ using ksets::ActivationHistory;
 using ksets::numeric;
 
 ActivationHistory::ActivationHistory(std::size_t historySize):
-    history(historySize, {0, 0}),
+    history(historySize, 0),
     monitoredWindow(std::nullopt) {}
 
-void ActivationHistory::put(numeric rawValue) {
+void ActivationHistory::put(numeric newValue) {
     if (monitoredWindow.has_value())
-        doMonitoring(rawValue);
+        doMonitoring(newValue);
     history.pop_front();
-    history.push_back({rawValue, ksets::sigmoid(rawValue)});
+    history.push_back(newValue);
 }
 
 numeric ActivationHistory::get(std::size_t offset) const {
     std::size_t index = history.size() - offset - 1;
-    return history.at(index).raw;
-}
-
-numeric ActivationHistory::getSigmoid(std::size_t offset) const {
-    std::size_t index = history.size() - offset - 1;
-    return history.at(index).sigmoid;
+    return history.at(index);
 }
 
 void ActivationHistory::resize(std::size_t newSize) {
@@ -74,9 +69,9 @@ std::pair<numeric, numeric> ActivationHistory::varianceNumeratorAndSum(std::size
     std::size_t n = 1;
     for (auto iter = tail(window-1); iter != end(); iter++) {
         numeric mean = sum / n;
-        numeric newMean = (sum + iter->raw) / (n + 1);
-        varianceNum += (iter->raw - mean) * (iter->raw - newMean);
-        sum += iter->raw;
+        numeric newMean = (sum + *iter) / (n + 1);
+        varianceNum += (*iter - mean) * (*iter - newMean);
+        sum += *iter;
         n++;
     }
     return {varianceNum, sum};

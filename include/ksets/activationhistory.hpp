@@ -14,11 +14,7 @@ namespace ksets {
             numeric varianceNumerator;
             MonitoringStats(std::size_t windowSize): windowSize(windowSize), sum(0), varianceNumerator(0) {};
         };
-        struct Entry {
-            numeric raw;
-            numeric sigmoid;
-        };
-        std::deque<Entry> history;
+        std::deque<ksets::numeric> history;
         std::optional<MonitoringStats> monitoredWindow;
 
         // returns variance numerator and sum of window, in that order
@@ -33,7 +29,6 @@ namespace ksets {
 
         void put(numeric rawValue);
         numeric get(std::size_t offset=0) const;
-        numeric getSigmoid(std::size_t offset=0) const;
         void resize(std::size_t newSize);
 
         numeric variance() const;
