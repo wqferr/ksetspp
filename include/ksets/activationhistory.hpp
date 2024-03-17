@@ -3,6 +3,7 @@
 #include <vector>
 #include <deque>
 #include <optional>
+#include <stdexcept>
 
 #include "config.hpp"
 

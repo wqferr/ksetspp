@@ -1,6 +1,8 @@
 #include "ksets/k3.hpp"
 #include <random>
 #include <sstream>
+#include <utility>
+#include <memory>
 
 using ksets::K0, ksets::K2, ksets::K2Layer, ksets::K3, ksets::K0Config;
 using ksets::K2Config, ksets::K3Config, ksets::numeric;
@@ -11,6 +13,15 @@ namespace {
         std::mt19937 engine {rd()};
         std::normal_distribution<numeric> dist {0.00, stdDev};
         return [=]() mutable {return dist(engine);};
+    }
+
+    std::function<int32_t()> randomDeviceSeedGenerator() {
+        std::vector<int32_t> cache(32, 0);
+        return [cache = std::move(cache)]() mutable {
+            return cache[0];
+        };
+        // auto rd = std::make_unique<std::random_device>();
+        // return [r = std::move(rd)]() mutable {return (*r)();};
     }
 
     K0Config ponConfig(const K3Config& k3config) {
@@ -45,9 +56,7 @@ K3::K3(std::size_t olfactoryBulbNumUnits, numeric initialRestMilliseconds, std::
     olfactoryBulb(olfactoryBulbNumUnits, obConfig(config)),
     anteriorOlfactoryNucleus(aonConfig(config)),
     prepiriformCortex(pcConfig(config)),
-    deepPyramidCells(new K0(dpcConfig(config))),
-    obPrimaryNodes(olfactoryBulbNumUnits),
-    obAntipodalNodes(olfactoryBulbNumUnits)
+    deepPyramidCells(new K0(dpcConfig(config)))
 {
     if (!config.checkWeightsValidity())
         throw std::invalid_argument("One or more K3 weights were invalid.");
@@ -55,10 +64,9 @@ K3::K3(std::size_t olfactoryBulbNumUnits, numeric initialRestMilliseconds, std::
     connectAllSubcomponents(config);
     randomizeK0States(rng);
 
-    aonStimulusRng = createGaussianRng(config.wAON_noise);
+    // aonStimulusRng = createGaussianRng(config.wAON_noise);
     advanceAonNoise();
 
-    cachePrimaryAndAntipodalOlfactoryBulbNodes();
     olfactoryBulb.setPrimaryHistorySize(config.outputHistorySize);
     olfactoryBulb.setPrimaryActivityMonitoring(config.outputActivityMonitoring);
     olfactoryBulb.setAntipodalHistorySize(config.outputHistorySize);
@@ -73,16 +81,9 @@ K3::K3(std::size_t olfactoryBulbNumUnits, numeric initialRestMilliseconds, ksets
     : K3(
         olfactoryBulbNumUnits,
         initialRestMilliseconds,
-        createGaussianRng(ksets::defaultK3RandomK0InitializationStdDev),
+        randomDeviceSeedGenerator(),
         config
     ) {}
-
-void K3::cachePrimaryAndAntipodalOlfactoryBulbNodes() noexcept {
-    for (std::size_t i = 0; i < olfactoryBulb.size(); i++) {
-        obPrimaryNodes[i] = olfactoryBulb.unit(i).primaryNode();
-        obAntipodalNodes[i] = olfactoryBulb.unit(i).antipodalNode();
-    }
-}
 
 void K3::randomizeK0States(std::function<numeric()>& rng) noexcept {
     for (auto pnUnit : periglomerularCells)
@@ -119,7 +120,8 @@ void K3::calculateAndCommitNextState() noexcept {
 }
 
 void K3::advanceAonNoise() noexcept {
-    anteriorOlfactoryNucleus.setExternalStimulus(aonStimulusRng());
+    // anteriorOlfactoryNucleus.setExternalStimulus(aonStimulusRng());
+    // TODO: advance noise in all noised
 }
 
 void K3::eraseExternalStimulus() noexcept {
@@ -156,13 +158,13 @@ void K3::nameAllSubcomponents() noexcept {
 }
 
 void K3::connectAllSubcomponents(const K3Config& config) noexcept {
-    connectPrimaryOlfactoryNerveLaterally(config.wPG_interUnit);
+    connectPeriglomerularCellsLaterally(config.wPG_interUnit);
     olfactoryBulb.connectPrimaryNodesLaterally(config.wOB_inter[0]);
     olfactoryBulb.connectAntipodalNodesLaterally(config.wOB_inter[1]);
     connectLayers(config);
 }
 
-void K3::connectPrimaryOlfactoryNerveLaterally(numeric weight, std::size_t delay) noexcept {
+void K3::connectPeriglomerularCellsLaterally(numeric weight, std::size_t delay) noexcept {
     for (auto it1 = periglomerularCells.begin(); it1 != periglomerularCells.end(); it1++) {
         for (auto it2 = it1 + 1; it2 != periglomerularCells.end(); it2++) {
             (*it1)->addInboundConnection(*it2, weight, delay);
@@ -179,7 +181,7 @@ void K3::connectLayers(const K3Config& config) noexcept {
         auto& pnUnit = *pnIter;
         auto& obUnit = *obIter;
 
-        obUnit.primaryNode()->addInboundConnection(pnUnit, 1.0, 0);
+        obUnit.primaryNode()->addInboundConnection(pnUnit, config.wPG_OB, config.dPG_OB);
 
         // AON -> PON connections
         pnUnit->addInboundConnection(
@@ -226,14 +228,6 @@ void K3::connectLayers(const K3Config& config) noexcept {
 
 const K2Layer& K3::getOlfactoryBulb() const noexcept {
     return olfactoryBulb;
-}
-
-const std::vector<std::shared_ptr<const K0>>& K3::getOlfactoryBulbPrimaryNodes() const noexcept {
-    return obPrimaryNodes;
-}
-
-const std::vector<std::shared_ptr<const K0>>& K3::getOlfactoryBulbAntipodalNodes() const noexcept {
-    return obAntipodalNodes;
 }
 
 const std::shared_ptr<const K0> K3::getPrepiriformCortexPrimary() const noexcept {

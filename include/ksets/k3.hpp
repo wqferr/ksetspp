@@ -22,7 +22,7 @@ namespace ksets {
 
         /// Weight between the periglomerular cells (PG, the input K0 array) and the
         /// excitatory K0 in the olfactory bulb (OB, layer 1 of K2 sets). Must be positive.
-        numeric wPG_OB = 1.00;
+        numeric wPG_OB = 0.10;
 
         /// Delay for wPG_OB connection. See wPG_OB for more information.
         std::size_t dPG_OB = 1;
@@ -92,9 +92,14 @@ namespace ksets {
 
 
         /// Scaling factor for noise injected into the primary K0 of the anterior olfactory nucleus (AON, layer 2 of
-        /// K2 sets). The injected noise follows a gaussian distribution with mean 0 and standard deviation wnoise_AON.
+        /// K2 sets). The injected noise follows a gaussian distribution with mean 0 and standard deviation wAON_noise.
         /// Must be positive.
-        numeric wAON_noise = 0.10;
+        numeric wAON_noise = 0.50;
+
+        /// Scaling factor for noise injected into the periglomerular nodes (PG, the input K0 array) and on the primary
+        /// nodes of the olfactory bulb (OB, layer 1 of K2 sets). The injected noise follows a gaussian distribution with
+        /// mean 0 and standard deviation wPG_noise. Must be positive.
+        numeric wPG_noise = 0.50;
 
         /// Intra unit weights for each of the K2 sets in the olfactory bulb (OB, layer 1 of K2 sets).
         /// Also controls history size for
@@ -148,13 +153,7 @@ namespace ksets {
         K2 prepiriformCortex;
         std::shared_ptr<K0> deepPyramidCells;
 
-        std::function<numeric()> aonStimulusRng;
-
-        // these 2 are redundant, just cached for easy retrieval of model output
-        std::vector<std::shared_ptr<const K0>> obPrimaryNodes;
-        std::vector<std::shared_ptr<const K0>> obAntipodalNodes;
-
-        void connectPrimaryOlfactoryNerveLaterally(numeric weight, std::size_t delay=0) noexcept;
+        void connectPeriglomerularCellsLaterally(numeric weight, std::size_t delay=0) noexcept;
         void connectLayers(const K3Config& config) noexcept;
 
         void nameAllSubcomponents() noexcept;
@@ -167,8 +166,6 @@ namespace ksets {
         void calculateAndCommitNextState() noexcept;
 
         void eraseExternalStimulus() noexcept;
-
-        void cachePrimaryAndAntipodalOlfactoryBulbNodes() noexcept;
 
         template<typename Iterator>
         void setPattern(Iterator patternFirst, Iterator patternEnd) {
@@ -194,7 +191,7 @@ namespace ksets {
 
     public:
         explicit K3(std::size_t olfactoryBulbNumUnits, numeric initialRestMilliseconds, K3Config config=K3Config());
-        explicit K3(std::size_t olfactoryBulbNumUnits, numeric initialRestMilliseconds, std::function<numeric()> rng, K3Config config=K3Config());
+        explicit K3(std::size_t olfactoryBulbNumUnits, numeric initialRestMilliseconds, std::function<numeric()> seedFactory, K3Config config=K3Config());
 
         void rest(numeric milliseconds) noexcept;
 
@@ -204,8 +201,6 @@ namespace ksets {
             run(milliseconds);
         }
 
-        const std::vector<std::shared_ptr<const K0>>& getOlfactoryBulbPrimaryNodes() const noexcept;
-        const std::vector<std::shared_ptr<const K0>>& getOlfactoryBulbAntipodalNodes() const noexcept;
         const K2Layer& getOlfactoryBulb() const noexcept;
         const std::shared_ptr<const K0> getPrepiriformCortexPrimary() const noexcept;
         const std::shared_ptr<const K0> getDeepPyramidCells() const noexcept;

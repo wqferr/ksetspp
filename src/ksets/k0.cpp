@@ -98,6 +98,7 @@ void K0::cloneSubgraph(std::map<const K0 *, std::shared_ptr<K0>>& partialMapping
 
 numeric K0::calculateNetInput() noexcept {
     numeric accumulation = currentExternalStimulus;
+    accumulation += currentInputNoise;
     for (auto& connection : inboundConnections)
         accumulation += connection.weight * connection.source->getDelayedOutput(connection.delay);
     return accumulation;
@@ -121,6 +122,16 @@ numeric K0::getDelayedOutput(std::size_t delay) const noexcept {
 
 void K0::setExternalStimulus(numeric newExternalStimulus) noexcept {
     currentExternalStimulus = newExternalStimulus;
+}
+
+void K0::setRngEngine(std::function<numeric()> newEngine) {
+    noiseRng = newEngine;
+    advanceNoise();
+}
+
+void K0::advanceNoise() {
+    auto engine = noiseRng.value();
+    currentInputNoise = engine();
 }
 
 numeric odeF1(numeric x, numeric dx_dt, numeric totalStimulus) noexcept {

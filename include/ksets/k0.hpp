@@ -39,11 +39,11 @@ namespace ksets {
     };
 
     class K0 {
-        std::vector<K0Connection> inboundConnections;
-        numeric currentExternalStimulus = 0;
-
         numeric calculateNetInput() noexcept;
         void pushOutputToHistory() noexcept;
+
+        std::vector<K0Connection> inboundConnections;
+        numeric currentExternalStimulus = 0;
 
         // [0] = current output (pre-sigmoid)
         // [1] = dout_dt
@@ -53,8 +53,11 @@ namespace ksets {
         OdeState nextOdeState = {0, 0};
         ActivationHistory activationHistory;
 
+        numeric currentInputNoise = 0;
+
         std::optional<std::reference_wrapper<K0Collection>> collection = std::nullopt;
         std::optional<std::size_t> id = std::nullopt;
+        std::optional<std::function<numeric()>> noiseRng;
 
         void swap(K0& other) noexcept;
     public:
@@ -68,6 +71,8 @@ namespace ksets {
 
         std::optional<std::reference_wrapper<K0Collection>> getCollection() noexcept { return collection; }
         std::optional<std::size_t> getId() noexcept { return id; }
+
+        void setRngEngine(std::function<numeric()> newEngine);
 
         void setHistorySize(std::size_t nIter);
         void setActivityMonitoring(std::size_t nIter);
@@ -85,6 +90,7 @@ namespace ksets {
         void calculateNextState() noexcept;
         void calculateNextState(numeric newExternalStimulus) noexcept;
         void commitNextState() noexcept;
+        void advanceNoise();
         void calculateAndCommitNextState() noexcept;
         void calculateAndCommitNextState(numeric newExternalStimulus) noexcept;
 
