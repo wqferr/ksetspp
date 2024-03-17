@@ -130,6 +130,14 @@ void K0::setRngEngine(std::function<numeric()> newEngine) {
 }
 
 void K0::advanceNoise() {
+    if (!noiseRng.has_value()) {
+        std::stringstream errMsg("Tried to advance noise on a node with no noise engine");
+        if (collection.has_value() && collection.value().get().hasName())
+            errMsg << ": collection \"" << collection.value().get().getName().value() << "\"";
+        if (id.has_value())
+            errMsg << " (node ID: " << id.value() << ")";
+        throw std::logic_error(errMsg.str());
+    }
     auto engine = noiseRng.value();
     currentInputNoise = engine();
 }

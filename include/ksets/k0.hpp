@@ -129,6 +129,7 @@ namespace ksets {
         ~K0Collection();
 
         void setName(std::string name) { this->name = name; }
+        bool hasName() const { return this->name.has_value(); }
         std::optional<std::string>& getName() noexcept { return name; }
 
         std::size_t size() const noexcept;
