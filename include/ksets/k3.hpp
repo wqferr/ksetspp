@@ -166,6 +166,7 @@ namespace ksets {
         void connectAllSubcomponents(const K3Config& config) noexcept;
 
         void randomizeK0States(std::function<numeric()>& rng) noexcept;
+        void setupInputAndAonNoise(std::function<rngseed()>& seedGen) noexcept;
 
         void calculateNextState() noexcept;
         void commitNextState() noexcept;
@@ -191,13 +192,13 @@ namespace ksets {
             }
         }
 
-        void advanceAonNoise() noexcept;
+        void advanceSystemNoise() noexcept;
 
         void run(numeric milliseconds) noexcept;
 
     public:
         explicit K3(std::size_t olfactoryBulbNumUnits, numeric initialRestMilliseconds, K3Config config=K3Config());
-        explicit K3(std::size_t olfactoryBulbNumUnits, numeric initialRestMilliseconds, std::function<numeric()> seedFactory, K3Config config=K3Config());
+        explicit K3(std::size_t olfactoryBulbNumUnits, numeric initialRestMilliseconds, std::function<rngseed()> seedFactory, K3Config config=K3Config());
 
         void rest(numeric milliseconds) noexcept;
 

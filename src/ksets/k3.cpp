@@ -5,25 +5,31 @@
 #include <memory>
 
 using ksets::K0, ksets::K1, ksets::K2, ksets::K2Layer, ksets::K3;
-using ksets::K0Config, ksets::K1Config, ksets::K2Config, ksets::K3Config, ksets::numeric;
+using ksets::K0Config, ksets::K1Config, ksets::K2Config, ksets::K3Config;
+using ksets::rngseed, ksets::numeric;
 
 namespace {
-    std::function<numeric()> createGaussianRng(numeric stdDev) {
-        std::random_device rd {};
-        std::mt19937 engine {rd()};
+    std::function<numeric()> createGaussianRng(numeric stdDev, rngseed seed) {
+        std::mt19937 engine {seed};
         std::normal_distribution<numeric> dist {0.00, stdDev};
-        return [=]() mutable {return dist(engine);};
+        return [engine = std::move(engine), dist]() mutable {return dist(engine);};
     }
 
-    std::function<int32_t()> randomDeviceSeedGenerator() {
+    std::function<rngseed()> randomDeviceSeedGenerator() {
         // TODO work on noise generation
         // look up seed_seq
-        std::vector<int32_t> cache(32, 0);
-        return [cache = std::move(cache)]() mutable {
-            return cache[0];
+        std::deque<rngseed> batch(32, 0);
+        std::size_t i = batch.size() - 1;
+        return [batch = std::move(batch), i]() mutable {
+            static std::seed_seq seedGen {};
+
+            i++;
+            if (i == batch.size()) {
+                seedGen.generate(batch.begin(), batch.end());
+                i = 0;
+            }
+            return batch[i];
         };
-        // auto rd = std::make_unique<std::random_device>();
-        // return [r = std::move(rd)]() mutable {return (*r)();};
     }
 
     K1Config pgConfig(const K3Config& k3config) {
@@ -55,7 +61,7 @@ namespace {
     }
 }
 
-K3::K3(std::size_t olfactoryBulbNumUnits, numeric initialRestMilliseconds, std::function<numeric()> rng, ksets::K3Config config):
+K3::K3(std::size_t olfactoryBulbNumUnits, numeric initialRestMilliseconds, std::function<rngseed()> seedGen, ksets::K3Config config):
     periglomerularCells(olfactoryBulbNumUnits, K1(pgConfig(config))),
     olfactoryBulb(olfactoryBulbNumUnits, obConfig(config)),
     anteriorOlfactoryNucleus(aonConfig(config)),
@@ -66,10 +72,11 @@ K3::K3(std::size_t olfactoryBulbNumUnits, numeric initialRestMilliseconds, std::
         throw std::invalid_argument("One or more K3 weights were invalid.");
     nameAllSubcomponents();
     connectAllSubcomponents(config);
-    randomizeK0States(rng);
 
-    // aonStimulusRng = createGaussianRng(config.wAON_noise);
-    advanceAonNoise();
+    auto initRng = createGaussianRng(K3_RANDOM_K0_INIT_STD_DEV, seedGen());
+    randomizeK0States(initRng);
+
+    setupInputAndAonNoise(seedGen);
 
     olfactoryBulb.setPrimaryHistorySize(config.outputHistorySize);
     olfactoryBulb.setPrimaryActivityMonitoring(config.outputActivityMonitoring);
@@ -90,18 +97,33 @@ K3::K3(std::size_t olfactoryBulbNumUnits, numeric initialRestMilliseconds, ksets
     ) {}
 
 void K3::randomizeK0States(std::function<numeric()>& rng) noexcept {
-    for (auto& pnUnit : periglomerularCells)
-        pnUnit.randomizeK0States(rng);
+    for (auto& pgUnit : periglomerularCells)
+        pgUnit.randomizeK0States(rng);
     olfactoryBulb.randomizeK0States(rng);
     anteriorOlfactoryNucleus.randomizeK0States(rng);
     prepiriformCortex.randomizeK0States(rng);
     deepPyramidCells->randomizeState(rng);
 }
 
+void K3::setupInputAndAonNoise(std::function<rngseed()>& seedGen) noexcept {
+    auto aonNoise = createGaussianRng(K3_AON_NOISE_STD_DEV, seedGen());
+    anteriorOlfactoryNucleus.primaryNode()->setRngEngine(std::move(aonNoise));
+
+    for (auto& pgUnit : periglomerularCells) {
+        auto engine = createGaussianRng(K3_PG_NOISE_STD_DEV, seedGen());
+        pgUnit.primaryNode()->setRngEngine(std::move(engine));
+    }
+
+    for (auto& obUnit : olfactoryBulb) {
+        auto engine = createGaussianRng(K3_OB_NOISE_STD_DEV, seedGen());
+        obUnit.primaryNode()->setRngEngine(std::move(engine));
+    }
+}
+
+
 void K3::calculateNextState() noexcept {
-    // TODO: add noise to input nodes
-    for (auto& pnUnit : periglomerularCells)
-        pnUnit.calculateNextState();
+    for (auto& pgUnit : periglomerularCells)
+        pgUnit.calculateNextState();
     olfactoryBulb.calculateNextState();
     anteriorOlfactoryNucleus.calculateNextState();
     prepiriformCortex.calculateNextState();
@@ -109,13 +131,13 @@ void K3::calculateNextState() noexcept {
 }
 
 void K3::commitNextState() noexcept {
-    for (auto& pnUnit : periglomerularCells)
-        pnUnit.commitNextState();
+    for (auto& pgUnit : periglomerularCells)
+        pgUnit.commitNextState();
     olfactoryBulb.commitNextState();
     anteriorOlfactoryNucleus.commitNextState();
     prepiriformCortex.commitNextState();
     deepPyramidCells->commitNextState();
-    advanceAonNoise();
+    advanceSystemNoise();
 }
 
 void K3::calculateAndCommitNextState() noexcept {
@@ -123,9 +145,12 @@ void K3::calculateAndCommitNextState() noexcept {
     commitNextState();
 }
 
-void K3::advanceAonNoise() noexcept {
-    // anteriorOlfactoryNucleus.setExternalStimulus(aonStimulusRng());
-    // TODO: advance noise in all noised
+void K3::advanceSystemNoise() noexcept {
+    anteriorOlfactoryNucleus.primaryNode()->advanceNoise();
+    for (auto& pgUnit : periglomerularCells)
+        pgUnit.primaryNode()->advanceNoise();
+    for (auto& obUnit : olfactoryBulb)
+        obUnit.primaryNode()->advanceNoise();
 }
 
 void K3::eraseExternalStimulus() noexcept {
@@ -186,13 +211,13 @@ void K3::connectLayers(const K3Config& config) noexcept {
     auto obIter = olfactoryBulb.begin();
     while (pnIter != periglomerularCells.end()) {
         assert(obIter != olfactoryBulb.end());
-        auto& pnUnit = *pnIter;
+        auto& pgUnit = *pnIter;
         auto& obUnit = *obIter;
 
-        obUnit.primaryNode()->addInboundConnection(pnUnit.primaryNode(), config.wPG_OB, config.dPG_OB);
+        obUnit.primaryNode()->addInboundConnection(pgUnit.primaryNode(), config.wPG_OB, config.dPG_OB);
 
         // AON -> PON connections
-        pnUnit.primaryNode()->addInboundConnection(
+        pgUnit.primaryNode()->addInboundConnection(
             anteriorOlfactoryNucleus.primaryNode(),
             config.wAON_PG_mot,
             config.dAON_PG_mot);

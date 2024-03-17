@@ -5,7 +5,9 @@
 #include <array>
 
 namespace ksets {
-    typedef float numeric;
+    using numeric = float;
+    using rngseed = uint64_t;
+
     constexpr std::size_t DEFAULT_HISTORY_SIZE = 1'000;
     constexpr numeric DEFAULT_LEARN_RATE = 0.05;
 
@@ -29,7 +31,11 @@ namespace ksets {
         );
     }
 
-    constexpr numeric defaultK3RandomK0InitializationStdDev = 0.02;
+    constexpr numeric K3_RANDOM_K0_INIT_STD_DEV = 0.20;
+    constexpr std::size_t K3_NOISE_RANDOM_SEED_GEN_BATCH_SIZE = 32;
+    constexpr numeric K3_PG_NOISE_STD_DEV = 0.025;
+    constexpr numeric K3_OB_NOISE_STD_DEV = 0.025;
+    constexpr numeric K3_AON_NOISE_STD_DEV = 0.025;
 
     // Default weights for the K3 set were moved to K3Config in k3.hpp
 }
