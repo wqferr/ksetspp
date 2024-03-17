@@ -16,8 +16,6 @@ namespace {
     }
 
     std::function<rngseed()> randomDeviceSeedGenerator() {
-        // TODO work on noise generation
-        // look up seed_seq
         std::deque<rngseed> batch(32, 0);
         std::size_t i = batch.size() - 1;
         return [batch = std::move(batch), i]() mutable {
