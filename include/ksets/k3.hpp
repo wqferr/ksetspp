@@ -7,6 +7,7 @@
 #include <functional>
 
 #include "ksets/k0.hpp"
+#include "ksets/k1.hpp"
 #include "ksets/k2.hpp"
 #include "ksets/k2layer.hpp"
 
@@ -15,10 +16,15 @@ namespace ksets {
         /// Weight between periglomerular (PG, the input K0 array) units.
         /// This will be divided by the number of units in the primary input nerve.
         /// Must be positive.
-        numeric wPG_interUnit = 0.90;
+        numeric wPG_interUnit = 0.20;
 
         /// Delay for wPG_interUnit connection. See wPG_interUnit for more information.
         std::size_t dPG_interUnit = 1;
+
+        K1Config wPG_intraUnit = {0.90, 0.90};
+
+        /// Delay for wPG_intraUnit connection. See wPG_intraUnit for more information.
+        std::size_t dPG_intraUnit = 0;
 
         /// Weight between the periglomerular cells (PG, the input K0 array) and the
         /// excitatory K0 in the olfactory bulb (OB, layer 1 of K2 sets). Must be positive.
@@ -147,7 +153,7 @@ namespace ksets {
     };
 
     class K3 {
-        K0Collection periglomerularCells;
+        std::vector<K1> periglomerularCells;
         K2Layer olfactoryBulb;
         K2 anteriorOlfactoryNucleus;
         K2 prepiriformCortex;
@@ -177,7 +183,7 @@ namespace ksets {
             while (patternIter != patternEnd) {
                 assert(pnIter != periglomerularCells.end());
                 assert(obIter != olfactoryBulb.end());
-                (*pnIter)->setExternalStimulus(*patternIter);
+                pnIter->setExternalStimulus(*patternIter);
                 obIter->setExternalStimulus(*patternIter);
                 patternIter++;
                 pnIter++;

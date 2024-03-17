@@ -4,8 +4,8 @@
 #include <utility>
 #include <memory>
 
-using ksets::K0, ksets::K2, ksets::K2Layer, ksets::K3, ksets::K0Config;
-using ksets::K2Config, ksets::K3Config, ksets::numeric;
+using ksets::K0, ksets::K1, ksets::K2, ksets::K2Layer, ksets::K3;
+using ksets::K0Config, ksets::K1Config, ksets::K2Config, ksets::K3Config, ksets::numeric;
 
 namespace {
     std::function<numeric()> createGaussianRng(numeric stdDev) {
@@ -16,6 +16,8 @@ namespace {
     }
 
     std::function<int32_t()> randomDeviceSeedGenerator() {
+        // TODO work on noise generation
+        // look up seed_seq
         std::vector<int32_t> cache(32, 0);
         return [cache = std::move(cache)]() mutable {
             return cache[0];
@@ -24,8 +26,10 @@ namespace {
         // return [r = std::move(rd)]() mutable {return (*r)();};
     }
 
-    K0Config ponConfig(const K3Config& k3config) {
-        return {k3config.nonOutputHistorySize};
+    K1Config pgConfig(const K3Config& k3config) {
+        K1Config k1config = {k3config.wPG_intraUnit};
+        k1config.k0config = {k3config.nonOutputHistorySize};
+        return k1config;
     }
 
     K2Config obConfig(const K3Config& k3config) {
@@ -52,7 +56,7 @@ namespace {
 }
 
 K3::K3(std::size_t olfactoryBulbNumUnits, numeric initialRestMilliseconds, std::function<numeric()> rng, ksets::K3Config config):
-    periglomerularCells(olfactoryBulbNumUnits, std::nullopt, ponConfig(config)),
+    periglomerularCells(olfactoryBulbNumUnits, K1(pgConfig(config))),
     olfactoryBulb(olfactoryBulbNumUnits, obConfig(config)),
     anteriorOlfactoryNucleus(aonConfig(config)),
     prepiriformCortex(pcConfig(config)),
@@ -86,8 +90,8 @@ K3::K3(std::size_t olfactoryBulbNumUnits, numeric initialRestMilliseconds, ksets
     ) {}
 
 void K3::randomizeK0States(std::function<numeric()>& rng) noexcept {
-    for (auto pnUnit : periglomerularCells)
-        pnUnit->randomizeState(rng);
+    for (auto& pnUnit : periglomerularCells)
+        pnUnit.randomizeK0States(rng);
     olfactoryBulb.randomizeK0States(rng);
     anteriorOlfactoryNucleus.randomizeK0States(rng);
     prepiriformCortex.randomizeK0States(rng);
@@ -96,8 +100,8 @@ void K3::randomizeK0States(std::function<numeric()>& rng) noexcept {
 
 void K3::calculateNextState() noexcept {
     // TODO: add noise to input nodes
-    for (auto pnUnit : periglomerularCells)
-        pnUnit->calculateNextState();
+    for (auto& pnUnit : periglomerularCells)
+        pnUnit.calculateNextState();
     olfactoryBulb.calculateNextState();
     anteriorOlfactoryNucleus.calculateNextState();
     prepiriformCortex.calculateNextState();
@@ -105,8 +109,8 @@ void K3::calculateNextState() noexcept {
 }
 
 void K3::commitNextState() noexcept {
-    for (auto pnUnit : periglomerularCells)
-        pnUnit->commitNextState();
+    for (auto& pnUnit : periglomerularCells)
+        pnUnit.commitNextState();
     olfactoryBulb.commitNextState();
     anteriorOlfactoryNucleus.commitNextState();
     prepiriformCortex.commitNextState();
@@ -128,7 +132,7 @@ void K3::eraseExternalStimulus() noexcept {
     auto pnIter = periglomerularCells.begin();
     auto obIter = olfactoryBulb.begin();
     while (pnIter != periglomerularCells.end()) {
-        (*pnIter)->setExternalStimulus(0);
+        pnIter->setExternalStimulus(0);
         obIter->setExternalStimulus(0);
         pnIter++;
         obIter++;
@@ -147,7 +151,11 @@ void K3::rest(numeric milliseconds) noexcept {
 }
 
 void K3::nameAllSubcomponents() noexcept {
-    periglomerularCells.setName("Primary olfactory nerve (input layer)");
+    for (std::size_t i = 0; i < periglomerularCells.size(); i++) {
+        std::stringstream unitName("Periglomerular cells (input layer) unit ");
+        unitName << i;
+        periglomerularCells[i].setName(unitName.str());
+    }
     for (std::size_t i = 0; i < olfactoryBulb.size(); i++) {
         std::stringstream unitName("Olfactory bulb (K2 layer 1) unit ");
         unitName << i;
@@ -167,8 +175,8 @@ void K3::connectAllSubcomponents(const K3Config& config) noexcept {
 void K3::connectPeriglomerularCellsLaterally(numeric weight, std::size_t delay) noexcept {
     for (auto it1 = periglomerularCells.begin(); it1 != periglomerularCells.end(); it1++) {
         for (auto it2 = it1 + 1; it2 != periglomerularCells.end(); it2++) {
-            (*it1)->addInboundConnection(*it2, weight, delay);
-            (*it2)->addInboundConnection(*it1, weight, delay);
+            it1->primaryNode()->addInboundConnection(it2->primaryNode(), weight, delay);
+            it2->primaryNode()->addInboundConnection(it1->primaryNode(), weight, delay);
         }
     }
 }
@@ -181,10 +189,10 @@ void K3::connectLayers(const K3Config& config) noexcept {
         auto& pnUnit = *pnIter;
         auto& obUnit = *obIter;
 
-        obUnit.primaryNode()->addInboundConnection(pnUnit, config.wPG_OB, config.dPG_OB);
+        obUnit.primaryNode()->addInboundConnection(pnUnit.primaryNode(), config.wPG_OB, config.dPG_OB);
 
         // AON -> PON connections
-        pnUnit->addInboundConnection(
+        pnUnit.primaryNode()->addInboundConnection(
             anteriorOlfactoryNucleus.primaryNode(),
             config.wAON_PG_mot,
             config.dAON_PG_mot);
