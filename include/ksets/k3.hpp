@@ -110,7 +110,7 @@ namespace ksets {
         /// Intra unit weights for each of the K2 sets in the olfactory bulb (OB, layer 1 of K2 sets).
         /// Also controls history size for
         /// See K2Config for more information.
-        K2Config wOB_unitConfig = {1.50, 2.47, -2.06, -2.45};
+        K2Config wOB_unitConfig = {1.50, 2.06, -2.47, -2.45};
 
         /// Inter unit weights between each pair of K2 sets in the olfactory bulb (OB, layer 1 of K2 sets).
         /// See K2Layer for more information.
@@ -122,7 +122,7 @@ namespace ksets {
 
         /// Intra unit weights for the single K2 set in the prepiriform cortex (PC, layer 3 of K2 sets).
         /// See K2Config for more information.
-        K2Config wPC_unitConfig = {0.82, 1.95, -1.94, -2.35};
+        K2Config wPC_unitConfig = {0.82, 1.94, -1.95, -2.35};
 
         // TODO: switch these numbers to length in milliseconds
         /// Length of history tracking for output nodes (primary and antipodal nodes of the olfactory bulb,
