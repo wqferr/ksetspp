@@ -20,7 +20,10 @@
 
 namespace ksets {
     struct K0Config {
-        std::size_t historySize = 100;
+        std::size_t historySize;
+        numeric sigmoidQ;
+        K0Config(std::size_t historySize=100, numeric sigmoidQ=5.00)
+            : historySize(historySize), sigmoidQ(sigmoidQ) {}
     };
 
     class K0;
@@ -32,8 +35,10 @@ namespace ksets {
         numeric weight;
         std::size_t delay;
 
-        K0Connection(std::shared_ptr<K0> source, K0 *target, numeric weight, std::size_t delay) noexcept
-            : source(source), target(target), weight(weight), delay(delay) {}
+        std::optional<conntag> tag;
+
+        K0Connection(std::shared_ptr<K0> source, K0 *target, numeric weight, std::size_t delay, std::optional<conntag> tag=std::nullopt) noexcept
+            : source(source), target(target), weight(weight), delay(delay), tag(tag) {}
 
         bool perturbWeight(numeric delta) noexcept;
     };
@@ -55,6 +60,7 @@ namespace ksets {
 
         numeric currentInputNoise = 0;
 
+        numeric sigmoidQ;
         std::optional<std::reference_wrapper<K0Collection>> collection = std::nullopt;
         std::optional<std::size_t> id = std::nullopt;
         std::optional<std::function<numeric()>> noiseRng;
@@ -80,7 +86,13 @@ namespace ksets {
         std::map<const K0 *, std::shared_ptr<K0>> cloneSubgraph() const noexcept;
         void cloneSubgraph(std::map<const K0 *, std::shared_ptr<K0>>& partialMapping) const noexcept;
 
-        void addInboundConnection(std::shared_ptr<K0> source, numeric weight, std::size_t delay=0) noexcept;
+        void addInboundConnection(
+            std::shared_ptr<K0> source,
+            numeric weight,
+            std::size_t delay=0,
+            std::optional<conntag> tag=std::nullopt
+        ) noexcept;
+        const std::vector<K0Connection>& connections() const { return inboundConnections; }
         void clearInboundConnections() noexcept;
 
         numeric getCurrentOutput() const noexcept;
@@ -97,23 +109,6 @@ namespace ksets {
         void randomizeState(std::function<numeric()>& rng) noexcept;
 
         const ActivationHistory& getActivationHistory() const noexcept;
-
-        auto iterInboundConnections() noexcept {
-            return inboundConnections.begin();
-        }
-
-        auto endInboundConnections() noexcept {
-            return inboundConnections.end();
-        }
-
-        const auto iterInboundConnections() const noexcept {
-            return inboundConnections.begin();
-        }
-
-        const auto endInboundConnections() const noexcept {
-            return inboundConnections.end();
-
-        }
     };
 
     class K0Collection {

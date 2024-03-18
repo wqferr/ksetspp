@@ -14,8 +14,16 @@ namespace ksets {
         explicit K2Layer(std::size_t nUnits, K2Config k2config);
 
         // these return true if weight was valid => operation succeeded
-        bool connectPrimaryNodesLaterally(numeric interUnitWeight, std::size_t delay=0) noexcept;
-        bool connectAntipodalNodesLaterally(numeric interUnitWeight, std::size_t delay=0) noexcept;
+        bool connectPrimaryNodesLaterally(
+            numeric interUnitWeight,
+            std::size_t delay=0,
+            std::optional<conntag> tag=std::nullopt
+        ) noexcept;
+        bool connectAntipodalNodesLaterally(
+            numeric interUnitWeight,
+            std::size_t delay=0,
+            std::optional<conntag> tag=std::nullopt
+        ) noexcept;
 
         void setPrimaryHistorySize(std::size_t newSize);
         void setAntipodalHistorySize(std::size_t newSize);

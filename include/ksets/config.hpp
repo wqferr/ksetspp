@@ -7,6 +7,7 @@
 namespace ksets {
     using numeric = float;
     using rngseed = uint64_t;
+    using conntag = int32_t;
 
     constexpr std::size_t DEFAULT_HISTORY_SIZE = 1'000;
     constexpr numeric DEFAULT_LEARN_RATE = 0.05;
@@ -22,11 +23,9 @@ namespace ksets {
     constexpr numeric ODE_A_DECAY_RATE = 0.22;
     constexpr numeric ODE_B_RISE_RATE = 0.72;
 
-    constexpr numeric SIGMOID_Q = 5;
-
-    constexpr numeric sigmoid(numeric x) {
+    constexpr numeric sigmoid(numeric x, numeric q) {
         return std::max(
-            SIGMOID_Q * (1 - std::exp(-(std::exp(x)-1) / SIGMOID_Q)),
+            q * (1 - std::exp(-(std::exp(x)-1) / q)),
             static_cast<numeric>(-1.0)
         );
     }
@@ -36,6 +35,4 @@ namespace ksets {
     constexpr numeric K3_PG_NOISE_STD_DEV = 0.025;
     constexpr numeric K3_OB_NOISE_STD_DEV = 0.025;
     constexpr numeric K3_AON_NOISE_STD_DEV = 0.025;
-
-    // Default weights for the K3 set were moved to K3Config in k3.hpp
 }

@@ -33,7 +33,7 @@ namespace {
 
     K1Config pgConfig(const K3Config& k3config) {
         K1Config k1config = {k3config.wPG_intraUnit};
-        k1config.k0config = {k3config.nonOutputHistorySize};
+        k1config.k0config = {k3config.nonOutputHistorySize, 1.824};
         return k1config;
     }
 

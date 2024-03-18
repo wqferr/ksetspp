@@ -5,7 +5,7 @@
 #include <memory>
 #include <stdexcept>
 
-using ksets::K0, ksets::K0Connection, ksets::K0Collection, ksets::numeric, ksets::sigmoid;
+using ksets::K0, ksets::K0Connection, ksets::K0Collection, ksets::numeric, ksets::conntag;
 
 bool K0Connection::perturbWeight(numeric delta) noexcept {
     numeric newWeight = weight + delta;
@@ -17,6 +17,7 @@ bool K0Connection::perturbWeight(numeric delta) noexcept {
 
 void K0::swap(K0& other) noexcept {
     activationHistory = std::exchange(other.activationHistory, activationHistory);
+    sigmoidQ = std::exchange(other.sigmoidQ, sigmoidQ);
     inboundConnections = std::exchange(other.inboundConnections, inboundConnections);
     // FIXME: hanging references that need outgoingConnections to be tracked
     for (auto& connection : inboundConnections)
@@ -28,13 +29,14 @@ void K0::swap(K0& other) noexcept {
 }
 
 K0::K0(K0Config config) noexcept:
-    activationHistory(config.historySize) {}
+    activationHistory(config.historySize), sigmoidQ(config.sigmoidQ) {}
 
 K0::K0(K0Collection& collection, std::size_t id, K0Config config) noexcept:
-    activationHistory(config.historySize), collection(collection), id(id) {}
+    activationHistory(config.historySize), sigmoidQ(config.sigmoidQ), collection(collection), id(id) {}
 
 K0::K0(const K0& other) noexcept:
     activationHistory(other.activationHistory),
+    sigmoidQ(other.sigmoidQ),
     inboundConnections(),
     odeState(other.odeState),
     nextOdeState(other.nextOdeState),
@@ -71,16 +73,12 @@ namespace {
     void doCloneSubgraph(std::map<const K0 *, std::shared_ptr<K0>>& oldToNew, const K0 *current) noexcept {
         std::shared_ptr<K0> newCurrent = std::shared_ptr<K0>(new K0(*current));
         oldToNew.insert(std::make_pair(current, newCurrent));
-        for (
-            auto connIter = current->iterInboundConnections();
-            connIter != current->endInboundConnections();
-            connIter++
-        ) {
-            std::shared_ptr<K0> other = connIter->source;
+        for (auto& conn : current->connections()) {
+            std::shared_ptr<K0> other = conn.source;
             if (oldToNew.find(other.get()) == oldToNew.end())
                 doCloneSubgraph(oldToNew, other.get());
             std::shared_ptr<K0> newOther = oldToNew.at(other.get());
-            newCurrent->addInboundConnection(newOther, connIter->weight, connIter->delay);
+            newCurrent->addInboundConnection(newOther, conn.weight, conn.delay);
         }
     }
 }
@@ -104,7 +102,12 @@ numeric K0::calculateNetInput() noexcept {
     return accumulation;
 }
 
-void K0::addInboundConnection(std::shared_ptr<K0> source, numeric weight, std::size_t delay) noexcept {
+void K0::addInboundConnection(
+    std::shared_ptr<K0> source,
+    numeric weight,
+    std::size_t delay,
+    std::optional<conntag> tag
+) noexcept {
     inboundConnections.emplace_back(source, this, weight, delay);
 }
 
@@ -193,7 +196,7 @@ void K0::commitNextState() noexcept {
 }
 
 void K0::pushOutputToHistory() noexcept {
-    activationHistory.put(sigmoid(odeState[0]));
+    activationHistory.put(sigmoid(odeState[0], sigmoidQ));
 }
 
 const ksets::ActivationHistory& K0::getActivationHistory() const noexcept {

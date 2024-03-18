@@ -21,6 +21,7 @@ namespace ksets {
         /// Delay for wPG_interUnit connection. See wPG_interUnit for more information.
         std::size_t dPG_interUnit = 1;
 
+        /// Weights for each of the K1 units in the periglomerular array. Both values must be positive.
         K1Config wPG_intraUnit = {0.48, 0.48};
 
         /// Delay for wPG_intraUnit connection. See wPG_intraUnit for more information.
@@ -28,7 +29,7 @@ namespace ksets {
 
         /// Weight between the periglomerular cells (PG, the input K0 array) and the
         /// excitatory K0 in the olfactory bulb (OB, layer 1 of K2 sets). Must be positive.
-        numeric wPG_OB = 0.10;
+        numeric wPG_OB = 0.30;
 
         /// Delay for wPG_OB connection. See wPG_OB for more information.
         std::size_t dPG_OB = 1;
@@ -145,6 +146,7 @@ namespace ksets {
 
         bool checkWeightsValidity() const {
             return pos(wPG_interUnit) && pos(wPG_OB) && pos(wOB_AON_lot) && pos(wOB_PC_lot)
+                && pos(wPG_intraUnit.wPrimarySecondary) && pos(wPG_intraUnit.wSecondaryPrimary)
                 && pos(wAON_PG_mot) && pos(wAON_OB_toAntipodal) && pos(wPC_AON_toAntipodal)
                 && neg(wPC_DPC) && pos(wDPC_PC) && pos(wDPC_OB_toAntipodal) && pos(wAON_noise)
                 && wOB_unitConfig.checkWeights() && wAON_unitConfig.checkWeights() && wPC_unitConfig.checkWeights();
@@ -155,6 +157,8 @@ namespace ksets {
     };
 
     class K3 {
+        static constexpr conntag TAG_OB_PRIMARY_LATERAL = 1;
+
         std::vector<K1> periglomerularCells;
         K2Layer olfactoryBulb;
         K2 anteriorOlfactoryNucleus;
