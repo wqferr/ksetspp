@@ -10,11 +10,11 @@ namespace ksets {
     using conntag = int32_t;
 
     constexpr std::size_t DEFAULT_HISTORY_SIZE = 1'000;
-    constexpr numeric DEFAULT_LEARN_RATE = 0.05;
 
     constexpr numeric ODE_STEP_SIZE = 0.5;
+    constexpr numeric ODE_STEP_RECIPROC = 1 / ODE_STEP_SIZE;
     constexpr std::size_t odeMillisecondsToIters(numeric milliseconds) {
-        return std::ceil(milliseconds / ODE_STEP_SIZE);
+        return std::ceil(milliseconds * ODE_STEP_RECIPROC);
     }
     constexpr numeric odeItersToMilliseconds(std::size_t nIter) {
         return nIter * ODE_STEP_SIZE;
@@ -29,10 +29,4 @@ namespace ksets {
             static_cast<numeric>(-1.0)
         );
     }
-
-    constexpr numeric K3_RANDOM_K0_INIT_STD_DEV = 0.20;
-    constexpr std::size_t K3_NOISE_RANDOM_SEED_GEN_BATCH_SIZE = 32;
-    constexpr numeric K3_PG_NOISE_STD_DEV = 0.025;
-    constexpr numeric K3_OB_NOISE_STD_DEV = 0.025;
-    constexpr numeric K3_AON_NOISE_STD_DEV = 0.025;
 }

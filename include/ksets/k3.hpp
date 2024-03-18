@@ -99,14 +99,18 @@ namespace ksets {
 
 
         /// Scaling factor for noise injected into the primary K0 of the anterior olfactory nucleus (AON, layer 2 of
-        /// K2 sets). The injected noise follows a gaussian distribution with mean 0 and standard deviation wAON_noise.
+        /// K2 sets). The injected noise follows a gaussian distribution with mean 0 and standard deviation noiseAON.
         /// Must be positive.
-        numeric wAON_noise = 0.50;
+        numeric noiseAON = 0.025;
 
-        /// Scaling factor for noise injected into the periglomerular nodes (PG, the input K0 array) and on the primary
-        /// nodes of the olfactory bulb (OB, layer 1 of K2 sets). The injected noise follows a gaussian distribution with
-        /// mean 0 and standard deviation wPG_noise. Must be positive.
-        numeric wPG_noise = 0.50;
+        /// Scaling factor for noise injected into the periglomerular nodes (PG, the input K0 array). The injected
+        /// noise follows a gaussian distribution with mean 0 and standard deviation noisePG. Must be positive.
+        numeric noisePG = 0.025;
+
+        /// Scaling factor for noise injected into the olfactory bulb (OB, layer 1 of K2 sets). The injected noise
+        /// follows a gaussian distribution with mean 0 and standard deviation noiseOB. Must be positive.
+        numeric noiseOB = 0.025;
+
 
         // unitConfig weights can be found in this article: https://escholarship.org/content/qt865921kr/qt865921kr.pdf?t=mq2sdl
 
@@ -139,6 +143,12 @@ namespace ksets {
         /// Length of history tracking for non-output nodes. See outputHistorySize for more information.
         std::size_t nonOutputHistorySize = 100;
 
+        /// Standard deviation of the gaussian RNG used to initialize all K0 in the K3 set.
+        numeric noiseInitialK0StateRandomization = 0.2;
+
+        /// Number of RNG seeds to be created in a batch.
+        std::size_t rngSeedGenBatchSize = 32;
+
         K3Config() {
             // assert default weights are valid
             assert(checkWeightsValidity());
@@ -148,7 +158,8 @@ namespace ksets {
             return pos(wPG_interUnit) && pos(wPG_OB) && pos(wOB_AON_lot) && pos(wOB_PC_lot)
                 && pos(wPG_intraUnit.wPrimarySecondary) && pos(wPG_intraUnit.wSecondaryPrimary)
                 && pos(wAON_PG_mot) && pos(wAON_OB_toAntipodal) && pos(wPC_AON_toAntipodal)
-                && neg(wPC_DPC) && pos(wDPC_PC) && pos(wDPC_OB_toAntipodal) && pos(wAON_noise)
+                && neg(wPC_DPC) && pos(wDPC_PC) && pos(wDPC_OB_toAntipodal)
+                && pos(noiseAON) && pos(noisePG) && pos(noiseOB)
                 && wOB_unitConfig.checkWeights() && wAON_unitConfig.checkWeights() && wPC_unitConfig.checkWeights();
         }
     private:
@@ -171,8 +182,8 @@ namespace ksets {
         void nameAllSubcomponents() noexcept;
         void connectAllSubcomponents(const K3Config& config) noexcept;
 
-        void randomizeK0States(std::function<numeric()>& rng) noexcept;
-        void setupInputAndAonNoise(std::function<rngseed()>& seedGen) noexcept;
+        void randomizeK0States(const K3Config& config, std::function<rngseed()>& rng) noexcept;
+        void setupInputAndAonNoise(const K3Config& config, std::function<rngseed()>& seedGen) noexcept;
 
         void calculateNextState() noexcept;
         void commitNextState() noexcept;

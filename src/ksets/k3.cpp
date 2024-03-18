@@ -15,8 +15,8 @@ namespace {
         return [engine = std::move(engine), dist]() mutable {return dist(engine);};
     }
 
-    std::function<rngseed()> randomDeviceSeedGenerator() {
-        std::deque<rngseed> batch(32, 0);
+    std::function<rngseed()> randomDeviceSeedGenerator(std::size_t batchSize) {
+        std::deque<rngseed> batch(batchSize, 0);
         std::size_t i = batch.size() - 1;
         return [batch = std::move(batch), i]() mutable {
             static std::random_device rd {};
@@ -72,10 +72,9 @@ K3::K3(std::size_t olfactoryBulbNumUnits, numeric initialRestMilliseconds, std::
     nameAllSubcomponents();
     connectAllSubcomponents(config);
 
-    auto initRng = createGaussianRng(K3_RANDOM_K0_INIT_STD_DEV, seedGen());
-    randomizeK0States(initRng);
-
-    setupInputAndAonNoise(seedGen);
+    // auto initRng = createGaussianRng(config.noiseInitialK0StateRandomization, seedGen());
+    randomizeK0States(config, seedGen);
+    setupInputAndAonNoise(config, seedGen);
 
     olfactoryBulb.setPrimaryHistorySize(config.outputHistorySize);
     olfactoryBulb.setPrimaryActivityMonitoring(config.outputActivityMonitoring);
@@ -91,11 +90,12 @@ K3::K3(std::size_t olfactoryBulbNumUnits, numeric initialRestMilliseconds, ksets
     : K3(
         olfactoryBulbNumUnits,
         initialRestMilliseconds,
-        randomDeviceSeedGenerator(),
+        randomDeviceSeedGenerator(config.rngSeedGenBatchSize),
         config
     ) {}
 
-void K3::randomizeK0States(std::function<numeric()>& rng) noexcept {
+void K3::randomizeK0States(const K3Config& config, std::function<ksets::rngseed()>& seedGen) noexcept {
+    auto rng = createGaussianRng(config.noiseInitialK0StateRandomization, seedGen());
     for (auto& pgUnit : periglomerularCells)
         pgUnit.randomizeK0States(rng);
     olfactoryBulb.randomizeK0States(rng);
@@ -104,17 +104,17 @@ void K3::randomizeK0States(std::function<numeric()>& rng) noexcept {
     deepPyramidCells->randomizeState(rng);
 }
 
-void K3::setupInputAndAonNoise(std::function<rngseed()>& seedGen) noexcept {
-    auto aonNoise = createGaussianRng(K3_AON_NOISE_STD_DEV, seedGen());
+void K3::setupInputAndAonNoise(const K3Config& config, std::function<rngseed()>& seedGen) noexcept {
+    auto aonNoise = createGaussianRng(config.noiseAON, seedGen());
     anteriorOlfactoryNucleus.primaryNode()->setRngEngine(std::move(aonNoise));
 
     for (auto& pgUnit : periglomerularCells) {
-        auto engine = createGaussianRng(K3_PG_NOISE_STD_DEV, seedGen());
+        auto engine = createGaussianRng(config.noisePG, seedGen());
         pgUnit.primaryNode()->setRngEngine(std::move(engine));
     }
 
     for (auto& obUnit : olfactoryBulb) {
-        auto engine = createGaussianRng(K3_OB_NOISE_STD_DEV, seedGen());
+        auto engine = createGaussianRng(config.noiseOB, seedGen());
         obUnit.primaryNode()->setRngEngine(std::move(engine));
     }
 }
