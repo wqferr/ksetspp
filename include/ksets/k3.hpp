@@ -182,7 +182,7 @@ namespace ksets {
         void nameAllSubcomponents() noexcept;
         void connectAllSubcomponents(const K3Config& config) noexcept;
 
-        void randomizeK0States(const K3Config& config, std::function<rngseed()>& rng) noexcept;
+        void randomizeK0States(const K3Config& config, std::function<rngseed()>& seedGen) noexcept;
         void setupInputAndAonNoise(const K3Config& config, std::function<rngseed()>& seedGen) noexcept;
 
         void calculateNextState() noexcept;

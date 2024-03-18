@@ -18,9 +18,10 @@ namespace {
     std::function<rngseed()> randomDeviceSeedGenerator(std::size_t batchSize) {
         std::deque<rngseed> batch(batchSize, 0);
         std::size_t i = batch.size() - 1;
-        return [batch = std::move(batch), i]() mutable {
-            static std::random_device rd {};
-            static std::seed_seq seedGen {rd(), rd(), rd(), rd()};
+        std::random_device rd {};
+        std::array<rngseed, 4> s = {rd(), rd(), rd(), rd()};
+        return [batch = std::move(batch), s = std::move(s), i]() mutable {
+            static std::seed_seq seedGen(s.begin(), s.end());
 
             i++;
             if (i == batch.size()) {
