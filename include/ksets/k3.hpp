@@ -14,14 +14,14 @@
 namespace ksets {
     struct K3Config {
         /// Weight between periglomerular (PG, the input K0 array) units.
-        /// This will be divided by the number of units in the primary input nerve.
+        /// This will be divided by the number of units in the primary input array.
         /// Must be positive.
         numeric wPG_interUnit = 0.20;
 
         /// Delay for wPG_interUnit connection. See wPG_interUnit for more information.
         std::size_t dPG_interUnit = 1;
 
-        K1Config wPG_intraUnit = {0.90, 0.90};
+        K1Config wPG_intraUnit = {0.48, 0.48};
 
         /// Delay for wPG_intraUnit connection. See wPG_intraUnit for more information.
         std::size_t dPG_intraUnit = 0;
@@ -107,22 +107,24 @@ namespace ksets {
         /// mean 0 and standard deviation wPG_noise. Must be positive.
         numeric wPG_noise = 0.50;
 
+        // unitConfig weights can be found in this article: https://escholarship.org/content/qt865921kr/qt865921kr.pdf?t=mq2sdl
+
         /// Intra unit weights for each of the K2 sets in the olfactory bulb (OB, layer 1 of K2 sets).
         /// Also controls history size for
         /// See K2Config for more information.
-        K2Config wOB_unitConfig = {1.50, 2.06, -2.47, -2.45};
+        K2Config wOB_unitConfig = {1.500, 2.323, -2.063, -2.445};
 
         /// Inter unit weights between each pair of K2 sets in the olfactory bulb (OB, layer 1 of K2 sets).
         /// See K2Layer for more information.
-        std::array<numeric, 2> wOB_inter = {0.15, -0.10};
+        std::array<numeric, 2> wOB_inter = {0.900, -0.900};
 
         /// Intra unit weights for the single K2 set in the anterior olfactory nucleus (AON, layer 2 of K2 sets).
         /// See K2Config for more information.
-        K2Config wAON_unitConfig = {1.6, 1.6, -1.5, -2.0};
+        K2Config wAON_unitConfig = {1.202, 1.372, -1.426, -1.571};
 
         /// Intra unit weights for the single K2 set in the prepiriform cortex (PC, layer 3 of K2 sets).
         /// See K2Config for more information.
-        K2Config wPC_unitConfig = {0.82, 1.94, -1.95, -2.35};
+        K2Config wPC_unitConfig = {0.823, 1.947, -1.938, -2.354};
 
         // TODO: switch these numbers to length in milliseconds
         /// Length of history tracking for output nodes (primary and antipodal nodes of the olfactory bulb,

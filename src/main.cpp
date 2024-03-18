@@ -38,11 +38,11 @@ int main(void) {
     // ------------------
     ksets::K3 model(4, 5000, rng);
 
-    std::vector<ksets::numeric> pattern = {1, 0, 1, 0};
-    model.present(4000, pattern.begin(), pattern.end());
-    model.rest(1000);
+    std::vector<ksets::numeric> pattern = {1, 10, 0, 0};
+    model.present(1600, pattern.begin(), pattern.end());
+    model.rest(200);
 
-    std::size_t fileHistSize = ksets::odeMillisecondsToIters(6000);
+    std::size_t fileHistSize = ksets::odeMillisecondsToIters(2000);
     for (auto& unit : model.getOlfactoryBulb())
         writeCsv(ofs, fileHistSize, *unit.primaryNode());
     // for (auto& unit : model.getOlfactoryBulb())
