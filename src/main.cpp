@@ -47,8 +47,8 @@ int main(void) {
         writeCsv(ofs, fileHistSize, *unit.primaryNode());
     // for (auto& unit : model.getOlfactoryBulb())
     //     writeCsv(ofs, fileHistSize, *unit.antipodalNode());
-    writeCsv(ofs, fileHistSize, model.getOlfactoryBulb().getAveragePrimaryActivationHistory());
+    // writeCsv(ofs, fileHistSize, model.getOlfactoryBulb().getAveragePrimaryActivationHistory());
     // writeCsv(ofs, fileHistSize, model.getOlfactoryBulb().getAverageAntipodalActivationHistory());
-    // writeCsv(ofs, fileHistSize, *model.getDeepPyramidCells());
     // writeCsv(ofs, fileHistSize, *model.getPrepiriformCortexPrimary());
+    // writeCsv(ofs, fileHistSize, *model.getDeepPyramidCells());
 }

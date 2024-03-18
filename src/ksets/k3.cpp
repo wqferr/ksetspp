@@ -19,7 +19,8 @@ namespace {
         std::deque<rngseed> batch(32, 0);
         std::size_t i = batch.size() - 1;
         return [batch = std::move(batch), i]() mutable {
-            static std::seed_seq seedGen {};
+            static std::random_device rd {};
+            static std::seed_seq seedGen {rd(), rd(), rd(), rd()};
 
             i++;
             if (i == batch.size()) {
