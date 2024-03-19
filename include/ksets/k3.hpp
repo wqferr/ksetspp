@@ -61,7 +61,7 @@ namespace ksets {
         /// Weight of the medium olfactory tract (MOT) between the anterior olfactory nucleus (AON, layer 2 of K2 sets)
         /// and the olfactory bulb (OB, layer 1 of K2 sets). It connects the single primary K0 in AON to all antipodal
         /// K0 in OB. Must be positive.
-        numeric wAON_OB_toAntipodal = 0.25;
+        numeric wAON_OB_toAntipodal = 0.75;
 
         /// Delay for wAON_OB_toAntipodal. See wAON_OB_toAntipodal for more information.
         std::size_t dAON_OB_toAntipodal = 25;
@@ -75,7 +75,7 @@ namespace ksets {
 
         /// Weight between the prepiriform cortex (PC, layer 3 of K2 sets) and the deep pyramid cells (DPC,
         /// <unknown function>). Must be negative.
-        numeric wPC_DPC = -0.05;
+        numeric wPC_DPC = -0.25;
 
         /// Delay for wPC_DPC. See wPC_DPC for more information.
         std::size_t dPC_DPC = 1;

@@ -121,15 +121,24 @@ void K3::setupInputAndAonNoise(const K3Config& config, std::function<rngseed()>&
     }
 }
 
+#include <iostream>
 void K3::perturbObPrimaryLateralWeights(std::size_t numObUnits, const K3Config& config, std::function<rngseed()>& seedGen) noexcept {
     auto weight = config.noiseObLateralWeights;
     if (numObUnits > 1) weight /= numObUnits - 1;
     auto rng = createGaussianRng(weight, seedGen());
     for (auto& unit : olfactoryBulb) {
+        std::cout << unit.getName().value() << '\n';
         for (auto& connection : *unit.primaryNode()) {
-            if (connection.tag.has_value() && connection.tag.value() == TAG_OB_PRIMARY_LATERAL)
+            std::cout << "CONNECTION: " << connection.tag.value_or(0) << '\n';
+            if (connection.tag.has_value() && connection.tag.value() == TAG_OB_PRIMARY_LATERAL) {
+                std::cout << *connection.source->getId() << "->";
+                std::cout << *connection.target->getId() << ' ';
+                std::cout << connection.weight << ' ';
                 connection.perturbWeight(rng());
+                std::cout << connection.weight << '\n';
+            }
         }
+        std::cout << '\n';
     }
 }
 
@@ -190,12 +199,14 @@ void K3::rest(numeric milliseconds) noexcept {
 
 void K3::nameAllSubcomponents() noexcept {
     for (std::size_t i = 0; i < periglomerularCells.size(); i++) {
-        std::stringstream unitName("Periglomerular cells (input layer) unit ");
+        std::stringstream unitName;
+        unitName << "Periglomerular cells (input layer) unit ";
         unitName << i;
         periglomerularCells[i].setName(unitName.str());
     }
     for (std::size_t i = 0; i < olfactoryBulb.size(); i++) {
-        std::stringstream unitName("Olfactory bulb (K2 layer 1) unit ");
+        std::stringstream unitName;
+        unitName << "Olfactory bulb (K2 layer 1) unit ";
         unitName << i;
         olfactoryBulb.unit(i).setName(unitName.str());
     }
@@ -205,7 +216,7 @@ void K3::nameAllSubcomponents() noexcept {
 
 void K3::connectAllSubcomponents(const K3Config& config) noexcept {
     connectPeriglomerularCellsLaterally(config.wPG_interUnit);
-    olfactoryBulb.connectPrimaryNodesLaterally(config.wOB_inter[0]);
+    olfactoryBulb.connectPrimaryNodesLaterally(config.wOB_inter[0], 0, TAG_OB_PRIMARY_LATERAL);
     olfactoryBulb.connectAntipodalNodesLaterally(config.wOB_inter[1]);
     connectLayers(config);
 }

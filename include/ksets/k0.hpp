@@ -37,7 +37,13 @@ namespace ksets {
 
         std::optional<conntag> tag;
 
-        K0Connection(std::shared_ptr<K0> source, K0 *target, numeric weight, std::size_t delay, std::optional<conntag> tag=std::nullopt) noexcept
+        K0Connection(
+            std::shared_ptr<K0> source,
+            K0 *target,
+            numeric weight,
+            std::size_t delay,
+            std::optional<conntag> tag=std::nullopt
+        ) noexcept
             : source(source), target(target), weight(weight), delay(delay), tag(tag) {}
 
         bool perturbWeight(numeric delta) noexcept;

@@ -4,6 +4,7 @@
 #include <vector>
 #include <utility>
 #include <random>
+#include <iostream>
 
 #include "ksets/k3.hpp"
 
@@ -20,7 +21,7 @@ void writeCsv(std::ofstream& ofs, std::size_t len, const ksets::K0& node) {
 }
 
 int main(void) {
-    std::ofstream ofs("data.csv");
+    std::ofstream ofs("data.csv", std::ios_base::app);
     // std::size_t fileHistSize = 1000;
 
     // Seeded RNG
@@ -37,16 +38,27 @@ int main(void) {
     // ------------------
     ksets::K3 model(4, 5000, rng);
 
-    std::vector<ksets::numeric> pattern = {1, 1, 0, 0};
+    std::vector<ksets::numeric> pattern = {0, 0, 1, 1};
     model.present(1000, pattern.begin(), pattern.end());
     model.rest(200);
+
+    for (auto& unit : model.getOlfactoryBulb()) {
+        for (auto& connection : *unit.node(0)) {
+            std::cout << connection.weight << " ";
+            std::cout << connection.source->getId().value() << "->";
+            std::cout << connection.target->getId().value() << " ";
+            std::cout << connection.tag.value_or(0) << '\n';
+        }
+        std::cout << '\n';
+    }
+    std::cout << std::flush;
 
     std::size_t fileHistSize = ksets::odeMillisecondsToIters(2000);
     for (auto& unit : model.getOlfactoryBulb())
         writeCsv(ofs, fileHistSize, *unit.primaryNode());
     // for (auto& unit : model.getOlfactoryBulb())
     //     writeCsv(ofs, fileHistSize, *unit.antipodalNode());
-    writeCsv(ofs, fileHistSize, model.getOlfactoryBulb().getAveragePrimaryActivationHistory());
+    // writeCsv(ofs, fileHistSize, model.getOlfactoryBulb().getAveragePrimaryActivationHistory());
     // writeCsv(ofs, fileHistSize, model.getOlfactoryBulb().getAverageAntipodalActivationHistory());
     // writeCsv(ofs, fileHistSize, *model.getPrepiriformCortexPrimary());
     // writeCsv(ofs, fileHistSize, *model.getDeepPyramidCells());

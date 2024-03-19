@@ -78,7 +78,7 @@ namespace {
             if (oldToNew.find(other.get()) == oldToNew.end())
                 doCloneSubgraph(oldToNew, other.get());
             std::shared_ptr<K0> newOther = oldToNew.at(other.get());
-            newCurrent->addInboundConnection(newOther, conn.weight, conn.delay);
+            newCurrent->addInboundConnection(newOther, conn.weight, conn.delay, conn.tag);
         }
     }
 }
@@ -108,7 +108,7 @@ void K0::addInboundConnection(
     std::size_t delay,
     std::optional<conntag> tag
 ) noexcept {
-    inboundConnections.emplace_back(source, this, weight, delay);
+    inboundConnections.emplace_back(source, this, weight, delay, tag);
 }
 
 void K0::clearInboundConnections() noexcept {
