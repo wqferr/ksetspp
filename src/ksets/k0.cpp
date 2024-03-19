@@ -73,7 +73,7 @@ namespace {
     void doCloneSubgraph(std::map<const K0 *, std::shared_ptr<K0>>& oldToNew, const K0 *current) noexcept {
         std::shared_ptr<K0> newCurrent = std::shared_ptr<K0>(new K0(*current));
         oldToNew.insert(std::make_pair(current, newCurrent));
-        for (auto& conn : current->connections()) {
+        for (auto& conn : *current) {
             std::shared_ptr<K0> other = conn.source;
             if (oldToNew.find(other.get()) == oldToNew.end())
                 doCloneSubgraph(oldToNew, other.get());

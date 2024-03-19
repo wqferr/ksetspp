@@ -92,8 +92,23 @@ namespace ksets {
             std::size_t delay=0,
             std::optional<conntag> tag=std::nullopt
         ) noexcept;
-        const std::vector<K0Connection>& connections() const { return inboundConnections; }
         void clearInboundConnections() noexcept;
+
+        auto begin() {
+            return inboundConnections.begin();
+        }
+
+        auto end() {
+            return inboundConnections.end();
+        }
+
+        auto begin() const {
+            return inboundConnections.begin();
+        }
+
+        auto end() const {
+            return inboundConnections.end();
+        }
 
         numeric getCurrentOutput() const noexcept;
         numeric getDelayedOutput(std::size_t delay) const noexcept;

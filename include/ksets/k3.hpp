@@ -120,8 +120,13 @@ namespace ksets {
         K2Config wOB_unitConfig = {1.500, 2.323, -2.063, -2.445};
 
         /// Inter unit weights between each pair of K2 sets in the olfactory bulb (OB, layer 1 of K2 sets).
-        /// See K2Layer for more information.
-        std::array<numeric, 2> wOB_inter = {0.900, -0.900};
+        /// These values will be divided by n-1, where n is the number of units in OB. See K2Layer for more information.
+        std::array<numeric, 2> wOB_inter = {0.300, -0.300};
+
+        /// Standard deviation of the gaussian RNG used to perturb the lateral weights between the primary
+        /// nodes of each of the units in the olfactory bulb (OB, layer 1 of K2 sets). These values will be divided
+        /// by n-1, where n is the number of units in OB. See K2Layer for more information.
+        numeric noiseObLateralWeights = 0.05;
 
         /// Intra unit weights for the single K2 set in the anterior olfactory nucleus (AON, layer 2 of K2 sets).
         /// See K2Config for more information.
@@ -184,6 +189,8 @@ namespace ksets {
 
         void randomizeK0States(const K3Config& config, std::function<rngseed()>& seedGen) noexcept;
         void setupInputAndAonNoise(const K3Config& config, std::function<rngseed()>& seedGen) noexcept;
+
+        void perturbObPrimaryLateralWeights(std::size_t numObUnits, const K3Config& config, std::function<rngseed()>& seedGen) noexcept;
 
         void calculateNextState() noexcept;
         void commitNextState() noexcept;

@@ -72,6 +72,7 @@ K3::K3(std::size_t olfactoryBulbNumUnits, numeric initialRestMilliseconds, std::
         throw std::invalid_argument("One or more K3 weights were invalid.");
     nameAllSubcomponents();
     connectAllSubcomponents(config);
+    perturbObPrimaryLateralWeights(olfactoryBulbNumUnits, config, seedGen);
 
     // auto initRng = createGaussianRng(config.noiseInitialK0StateRandomization, seedGen());
     randomizeK0States(config, seedGen);
@@ -117,6 +118,18 @@ void K3::setupInputAndAonNoise(const K3Config& config, std::function<rngseed()>&
     for (auto& obUnit : olfactoryBulb) {
         auto engine = createGaussianRng(config.noiseOB, seedGen());
         obUnit.primaryNode()->setRngEngine(std::move(engine));
+    }
+}
+
+void K3::perturbObPrimaryLateralWeights(std::size_t numObUnits, const K3Config& config, std::function<rngseed()>& seedGen) noexcept {
+    auto weight = config.noiseObLateralWeights;
+    if (numObUnits > 1) weight /= numObUnits - 1;
+    auto rng = createGaussianRng(weight, seedGen());
+    for (auto& unit : olfactoryBulb) {
+        for (auto& connection : *unit.primaryNode()) {
+            if (connection.tag.has_value() && connection.tag.value() == TAG_OB_PRIMARY_LATERAL)
+                connection.perturbWeight(rng());
+        }
     }
 }
 

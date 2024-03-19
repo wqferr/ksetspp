@@ -39,9 +39,9 @@ int main(void) {
 
     std::vector<ksets::numeric> pattern = {1, 1, 0, 0};
     model.present(1000, pattern.begin(), pattern.end());
-    // model.rest(200);
+    model.rest(200);
 
-    std::size_t fileHistSize = ksets::odeMillisecondsToIters(1000);
+    std::size_t fileHistSize = ksets::odeMillisecondsToIters(2000);
     for (auto& unit : model.getOlfactoryBulb())
         writeCsv(ofs, fileHistSize, *unit.primaryNode());
     // for (auto& unit : model.getOlfactoryBulb())
