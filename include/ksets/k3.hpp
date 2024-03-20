@@ -19,9 +19,10 @@ namespace ksets {
         numeric wPG_interUnit = 0.20;
 
         /// Delay for wPG_interUnit connection. See wPG_interUnit for more information.
-        std::size_t dPG_interUnit = 1;
+        std::size_t dPG_interUnit = 0;
 
         /// Weights for each of the K1 units in the periglomerular array. Both values must be positive.
+        // K1Config wPG_intraUnit = {0.48, 0.48};
         K1Config wPG_intraUnit = {0.48, 0.48};
 
         /// Delay for wPG_intraUnit connection. See wPG_intraUnit for more information.
@@ -32,7 +33,7 @@ namespace ksets {
         numeric wPG_OB = 0.30;
 
         /// Delay for wPG_OB connection. See wPG_OB for more information.
-        std::size_t dPG_OB = 1;
+        std::size_t dPG_OB = 0;
 
         /// Weight of the lateral olfactory tract (LOT) between the olfactory bulb (OB, layer 1 of K2 sets)
         /// and the anterior olfactory nucleus (AON, layer 2). It connects all primary K0 in OB to the single
@@ -40,7 +41,7 @@ namespace ksets {
         numeric wOB_AON_lot = 0.15;
 
         /// Delay for wOB_AON_lot connection. See wOB_AON_lot for more information.
-        std::size_t dOB_AON_lot = 1;
+        std::size_t dOB_AON_lot = 0;
 
         /// Weight of the lateral olfactory tract (LOT) between the olfactory bulb (OB, layer 1 of K2 sets)
         /// and the prepiriform cortex (PC, layer 3 of K2 sets). It connects all primary K0 in OB to the single
@@ -48,29 +49,30 @@ namespace ksets {
         numeric wOB_PC_lot = 0.60;
 
         /// Delay for wOB_PC_lot. See wOB_PC_lot for more information.
-        std::size_t dOB_PC_lot = 1;
+        std::size_t dOB_PC_lot = 0;
 
         /// Weight of the medium olfactory tract (MOT) between the anterior olfactory nucleus (AON, layer 2 of K2 sets)
         /// and the periglomerular cells (PG, the input K0 array). It connects the single primary K0 in AON to all
         /// K0 in PG. Must be positive.
-        numeric wAON_PG_mot = 0.05;
+        numeric wAON_PG_mot = 6.020;
 
-        /// Delay for wAON_PG_mot. See wAON_PG_mot for more information.
-        std::size_t dAON_PG_mot = 17;
+        /// Delay for wAON_PG_mot. See wAON_PG_mot for more information. This is marked as D2 in the diagram.
+        std::size_t dAON_PG_mot = 26;
 
         /// Weight of the medium olfactory tract (MOT) between the anterior olfactory nucleus (AON, layer 2 of K2 sets)
         /// and the olfactory bulb (OB, layer 1 of K2 sets). It connects the single primary K0 in AON to all antipodal
         /// K0 in OB. Must be positive.
-        numeric wAON_OB_toAntipodal = 0.75;
+        numeric wAON_OB_toAntipodal = 3.240;
 
-        /// Delay for wAON_OB_toAntipodal. See wAON_OB_toAntipodal for more information.
-        std::size_t dAON_OB_toAntipodal = 25;
+        /// Delay for wAON_OB_toAntipodal. See wAON_OB_toAntipodal for more information. This is marked as D1 in the diagram.
+        std::size_t dAON_OB_toAntipodal = 20;
 
         /// Weight between the prepiriform cortex (PC, layer 3 of K2 sets) and the anterior olfactory nucleus (AON,
         /// layer 2 of K2 sets). It connects the primary node of PC to the antipodal node of AON. Must be positive.
-        numeric wPC_AON_toAntipodal = 0.20;
+        numeric wPC_AON_toAntipodal = 3.780;
 
-        /// Delay for wPC_AON_toAntipodal. See wPC_AON_toAntipodal for more information.
+        /// Delay for wPC_AON_toAntipodal. See wPC_AON_toAntipodal for more information. This is marked as D3
+        /// in the diagram.
         std::size_t dPC_AON_toAntipodal = 25;
 
         /// Weight between the prepiriform cortex (PC, layer 3 of K2 sets) and the deep pyramid cells (DPC,
@@ -78,7 +80,7 @@ namespace ksets {
         numeric wPC_DPC = -0.25;
 
         /// Delay for wPC_DPC. See wPC_DPC for more information.
-        std::size_t dPC_DPC = 1;
+        std::size_t dPC_DPC = 0;
 
         /// Weight between the deep pyramid cells (DPC, <unknown function>) back to the prepiriform cortex
         /// (PC, layer 3 of K2 sets). Must be positive. THIS DEFAULT VALUE IS A GUESS! I DON'T KNOW THE ACTUAL VALUES
@@ -86,16 +88,17 @@ namespace ksets {
         numeric wDPC_PC = 0.20;
 
         /// Delay for wDPC_PC. See wDPC_PC for more information.
-        std::size_t dDPC_PC = 1;
+        std::size_t dDPC_PC = 0;
 
         /// Weight between the deep pyramid cells (DPC, <unknown function>) and the olfactory bulb (OB, layer 1
         /// of K2 sets). It connects the single K0 set of DPC to all antipodal K0 sets in OB. Must be positive.
         /// THIS DEFAULT VALUE IS A GUESS! I DON'T KNOW THE ACTUAL VALUES OF THIS WEIGHT OR DELAY WITHOUT
         /// ACCESS TO THE ARTICLE.
-        numeric wDPC_OB_toAntipodal = 0.50;
+        numeric wDPC_OB_toAntipodal = 0.240;
 
-        /// Delay for wDPC_OB_toAntipodal. See wDPC_OB_toAntipodal for more information.
-        std::size_t dDPC_OB_toAntipodal = 40;
+        /// Delay for wDPC_OB_toAntipodal. See wDPC_OB_toAntipodal for more information. This is marked as D4
+        /// in the diagram.
+        std::size_t dDPC_OB_toAntipodal = 38;
 
 
         /// Scaling factor for noise injected into the primary K0 of the anterior olfactory nucleus (AON, layer 2 of
@@ -139,14 +142,14 @@ namespace ksets {
         // TODO: switch these numbers to length in milliseconds
         /// Length of history tracking for output nodes (primary and antipodal nodes of the olfactory bulb,
         /// layer 1 of K2 sets).
-        std::size_t outputHistorySize = 20'000;
+        std::size_t outputHistorySize = 5'000;
 
         /// Number of latest iterations for which output nodes (primary and antipodal nodes of the olfactory bulb,
         /// layer 1 of K2 sets) variance and standard deviation will be tracked.
-        std::size_t outputActivityMonitoring = 1'000;
+        std::size_t outputActivityMonitoring = 300;
 
         /// Length of history tracking for non-output nodes. See outputHistorySize for more information.
-        std::size_t nonOutputHistorySize = 100;
+        std::size_t nonOutputHistorySize = 400;
 
         /// Standard deviation of the gaussian RNG used to initialize all K0 in the K3 set.
         numeric noiseInitialK0StateRandomization = 0.2;
@@ -179,12 +182,12 @@ namespace ksets {
         K2Layer olfactoryBulb;
         K2 anteriorOlfactoryNucleus;
         K2 prepiriformCortex;
-        std::shared_ptr<K0> deepPyramidCells;
+        K0Collection deepPyramidCells;
 
         void connectPeriglomerularCellsLaterally(numeric weight, std::size_t delay=0) noexcept;
         void connectLayers(const K3Config& config) noexcept;
 
-        void nameAllSubcomponents() noexcept;
+        void nameAndSetCollectionForAllSubcomponents() noexcept;
         void connectAllSubcomponents(const K3Config& config) noexcept;
 
         void randomizeK0States(const K3Config& config, std::function<rngseed()>& seedGen) noexcept;
@@ -233,6 +236,7 @@ namespace ksets {
         }
 
         const K2Layer& getOlfactoryBulb() const noexcept;
+        const K2& getAnteriorOlfactoryNucleus() const noexcept;
         const std::shared_ptr<const K0> getPrepiriformCortexPrimary() const noexcept;
         const std::shared_ptr<const K0> getDeepPyramidCells() const noexcept;
     };

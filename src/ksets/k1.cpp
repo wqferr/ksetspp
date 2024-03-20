@@ -5,7 +5,6 @@
 
 using ksets::K0, ksets::K1, ksets::numeric;
 
-// FIXME: I never actually use K1... Should I remove it?
 K1::K1(K1Config config):
     K0Collection(2, std::nullopt, config.k0config)
 {

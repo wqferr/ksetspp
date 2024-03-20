@@ -66,11 +66,11 @@ K3::K3(std::size_t olfactoryBulbNumUnits, numeric initialRestMilliseconds, std::
     olfactoryBulb(olfactoryBulbNumUnits, obConfig(config)),
     anteriorOlfactoryNucleus(aonConfig(config)),
     prepiriformCortex(pcConfig(config)),
-    deepPyramidCells(new K0(dpcConfig(config)))
+    deepPyramidCells(1, "Deep pyramid cells", dpcConfig(config))
 {
     if (!config.checkWeightsValidity())
         throw std::invalid_argument("One or more K3 weights were invalid.");
-    nameAllSubcomponents();
+    nameAndSetCollectionForAllSubcomponents();
     connectAllSubcomponents(config);
     perturbObPrimaryLateralWeights(olfactoryBulbNumUnits, config, seedGen);
 
@@ -82,6 +82,8 @@ K3::K3(std::size_t olfactoryBulbNumUnits, numeric initialRestMilliseconds, std::
     olfactoryBulb.setPrimaryActivityMonitoring(config.outputActivityMonitoring);
     olfactoryBulb.setAntipodalHistorySize(config.outputHistorySize);
     olfactoryBulb.setAntipodalActivityMonitoring(config.outputActivityMonitoring);
+    anteriorOlfactoryNucleus.primaryNode()->setHistorySize(config.outputHistorySize);
+    anteriorOlfactoryNucleus.primaryNode()->setActivityMonitoring(config.outputActivityMonitoring);
     prepiriformCortex.primaryNode()->setHistorySize(config.outputHistorySize);
     prepiriformCortex.primaryNode()->setActivityMonitoring(config.outputActivityMonitoring);
 
@@ -103,7 +105,7 @@ void K3::randomizeK0States(const K3Config& config, std::function<ksets::rngseed(
     olfactoryBulb.randomizeK0States(rng);
     anteriorOlfactoryNucleus.randomizeK0States(rng);
     prepiriformCortex.randomizeK0States(rng);
-    deepPyramidCells->randomizeState(rng);
+    deepPyramidCells.randomizeK0States(rng);
 }
 
 void K3::setupInputAndAonNoise(const K3Config& config, std::function<rngseed()>& seedGen) noexcept {
@@ -121,24 +123,15 @@ void K3::setupInputAndAonNoise(const K3Config& config, std::function<rngseed()>&
     }
 }
 
-#include <iostream>
 void K3::perturbObPrimaryLateralWeights(std::size_t numObUnits, const K3Config& config, std::function<rngseed()>& seedGen) noexcept {
     auto weight = config.noiseObLateralWeights;
     if (numObUnits > 1) weight /= numObUnits - 1;
     auto rng = createGaussianRng(weight, seedGen());
     for (auto& unit : olfactoryBulb) {
-        std::cout << unit.getName().value() << '\n';
         for (auto& connection : *unit.primaryNode()) {
-            std::cout << "CONNECTION: " << connection.tag.value_or(0) << '\n';
-            if (connection.tag.has_value() && connection.tag.value() == TAG_OB_PRIMARY_LATERAL) {
-                std::cout << *connection.source->getId() << "->";
-                std::cout << *connection.target->getId() << ' ';
-                std::cout << connection.weight << ' ';
+            if (connection.tag.has_value() && connection.tag.value() == TAG_OB_PRIMARY_LATERAL)
                 connection.perturbWeight(rng());
-                std::cout << connection.weight << '\n';
-            }
         }
-        std::cout << '\n';
     }
 }
 
@@ -149,7 +142,7 @@ void K3::calculateNextState() noexcept {
     olfactoryBulb.calculateNextState();
     anteriorOlfactoryNucleus.calculateNextState();
     prepiriformCortex.calculateNextState();
-    deepPyramidCells->calculateNextState();
+    deepPyramidCells.calculateNextState();
 }
 
 void K3::commitNextState() noexcept {
@@ -158,7 +151,7 @@ void K3::commitNextState() noexcept {
     olfactoryBulb.commitNextState();
     anteriorOlfactoryNucleus.commitNextState();
     prepiriformCortex.commitNextState();
-    deepPyramidCells->commitNextState();
+    deepPyramidCells.commitNextState();
     advanceSystemNoise();
 }
 
@@ -197,21 +190,25 @@ void K3::rest(numeric milliseconds) noexcept {
     run(milliseconds);
 }
 
-void K3::nameAllSubcomponents() noexcept {
+void K3::nameAndSetCollectionForAllSubcomponents() noexcept {
     for (std::size_t i = 0; i < periglomerularCells.size(); i++) {
         std::stringstream unitName;
         unitName << "Periglomerular cells (input layer) unit ";
         unitName << i;
         periglomerularCells[i].setName(unitName.str());
+        periglomerularCells[i].updateNodeCollectionReferenceAndId();
     }
     for (std::size_t i = 0; i < olfactoryBulb.size(); i++) {
         std::stringstream unitName;
         unitName << "Olfactory bulb (K2 layer 1) unit ";
         unitName << i;
         olfactoryBulb.unit(i).setName(unitName.str());
+        olfactoryBulb.unit(i).updateNodeCollectionReferenceAndId();
     }
     anteriorOlfactoryNucleus.setName("Anterior olfactory nucleus (K2 layer 2)");
+    anteriorOlfactoryNucleus.updateNodeCollectionReferenceAndId();
     prepiriformCortex.setName("Prepiriform cortex (K2 layer 3)");
+    prepiriformCortex.updateNodeCollectionReferenceAndId();
 }
 
 void K3::connectAllSubcomponents(const K3Config& config) noexcept {
@@ -258,7 +255,7 @@ void K3::connectLayers(const K3Config& config) noexcept {
             config.wAON_OB_toAntipodal,
             config.dAON_OB_toAntipodal);
         obUnit.antipodalNode()->addInboundConnection(
-            deepPyramidCells, config.wDPC_OB_toAntipodal, config.dDPC_OB_toAntipodal);
+            deepPyramidCells.primaryNode(), config.wDPC_OB_toAntipodal, config.dDPC_OB_toAntipodal);
 
         pnIter++;
         obIter++;
@@ -271,14 +268,14 @@ void K3::connectLayers(const K3Config& config) noexcept {
         config.dPC_AON_toAntipodal);
 
     // Prepiriform cortex -> deep pyramid cells
-    deepPyramidCells->addInboundConnection(
+    deepPyramidCells.primaryNode()->addInboundConnection(
         prepiriformCortex.antipodalNode(),
         config.wPC_DPC,
         config.dPC_DPC);
 
     // Deep pyramid cells -> prepiriform cortex
     prepiriformCortex.antipodalNode()->addInboundConnection(
-        deepPyramidCells,
+        deepPyramidCells.primaryNode(),
         config.wDPC_PC,
         config.dDPC_PC);
 }
@@ -287,11 +284,15 @@ const K2Layer& K3::getOlfactoryBulb() const noexcept {
     return olfactoryBulb;
 }
 
+const K2& K3::getAnteriorOlfactoryNucleus() const noexcept {
+    return anteriorOlfactoryNucleus;
+}
+
 const std::shared_ptr<const K0> K3::getPrepiriformCortexPrimary() const noexcept {
     return prepiriformCortex.primaryNode();
 }
 
 
 const std::shared_ptr<const K0> K3::getDeepPyramidCells() const noexcept {
-    return deepPyramidCells;
+    return deepPyramidCells.primaryNode();
 }

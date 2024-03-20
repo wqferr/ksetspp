@@ -1,7 +1,8 @@
 #include "ksets/k0.hpp"
 
 #include <numeric>
-#include <tgmath.h>
+#include <ctgmath>
+#include <sstream>
 #include <memory>
 #include <stdexcept>
 
@@ -41,6 +42,9 @@ K0::K0(const K0& other) noexcept:
     odeState(other.odeState),
     nextOdeState(other.nextOdeState),
     currentExternalStimulus(other.currentExternalStimulus),
+    // collection is ommited on purpose! this requires extra care
+    // when cloning since you want to clone the entire subgraph and create
+    // a collection based on that
     id(other.id) {}
 
 K0::K0(K0&& other) noexcept {
@@ -68,6 +72,14 @@ void K0::setActivityMonitoring(std::size_t nIter) {
     activationHistory.setActivityMonitoring(nIter);
 }
 
+void K0::setCollection(K0Collection& collection) noexcept {
+    this->collection = collection;
+}
+
+void K0::setId(std::size_t id) noexcept {
+    this->id = id;
+}
+
 // translation unit "private" function
 namespace {
     void doCloneSubgraph(std::map<const K0 *, std::shared_ptr<K0>>& oldToNew, const K0 *current) noexcept {
@@ -91,6 +103,24 @@ std::map<const K0 *, std::shared_ptr<K0>> K0::cloneSubgraph() const noexcept {
 
 void K0::cloneSubgraph(std::map<const K0 *, std::shared_ptr<K0>>& partialMapping) const noexcept {
     doCloneSubgraph(partialMapping, this);
+}
+
+std::string K0::repr() const noexcept {
+    std::stringstream s;
+    s << "node";
+    if (id.has_value()) {
+        s << ' ' << id.value();
+    }
+
+    if (collection.has_value()) {
+        s << " @ ";
+        if (collection.value().get().getName().has_value())
+            s << collection.value().get().getName().value();
+        else
+            s << "<nameless collection>";
+    }
+
+    return s.str();
 }
 
 
@@ -247,6 +277,13 @@ const std::shared_ptr<K0> K0Collection::node(std::size_t index) const {
 
 std::size_t K0Collection::size() const noexcept {
     return nodes.size();
+}
+
+void K0Collection::updateNodeCollectionReferenceAndId() noexcept {
+    for (std::size_t i = 0; i < size(); i++) {
+        nodes[i]->setCollection(*this);
+        nodes[i]->setId(i);
+    }
 }
 
 void K0Collection::setExternalStimulus(numeric newExternalStimulus) noexcept {

@@ -88,9 +88,13 @@ namespace ksets {
 
         void setHistorySize(std::size_t nIter);
         void setActivityMonitoring(std::size_t nIter);
+        void setCollection(K0Collection& collection) noexcept;
+        void setId(std::size_t id) noexcept;
 
         std::map<const K0 *, std::shared_ptr<K0>> cloneSubgraph() const noexcept;
         void cloneSubgraph(std::map<const K0 *, std::shared_ptr<K0>>& partialMapping) const noexcept;
+
+        std::string repr() const noexcept;
 
         void addInboundConnection(
             std::shared_ptr<K0> source,
@@ -149,6 +153,9 @@ namespace ksets {
         std::optional<std::string>& getName() noexcept { return name; }
 
         std::size_t size() const noexcept;
+
+        // sets the nodes in this collection to have a reference to it
+        void updateNodeCollectionReferenceAndId() noexcept;
 
         std::shared_ptr<K0> primaryNode() noexcept { return node(0); }
         const std::shared_ptr<K0> primaryNode() const noexcept { return node(0); }
