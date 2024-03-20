@@ -121,7 +121,7 @@ namespace ksets {
 
         /// Inter unit weights between each pair of K2 sets in the olfactory bulb (OB, layer 1 of K2 sets).
         /// These values will be divided by n-1, where n is the number of units in OB. See K2Layer for more information.
-        std::array<numeric, 2> wOB_inter = {0.300, 1.000};
+        std::array<numeric, 2> wOB_inter = {0.300, -1.000};
 
         /// Standard deviation of the gaussian RNG used to perturb the lateral weights between the primary
         /// nodes of each of the units in the olfactory bulb (OB, layer 1 of K2 sets). These values will be divided
@@ -165,7 +165,7 @@ namespace ksets {
                 && pos(wAON_PG_mot) && pos(wAON_OB_toAntipodal) && pos(wPC_AON_toAntipodal)
                 && neg(wPC_DPC) && pos(wDPC_PC) && pos(wDPC_OB_toAntipodal)
                 && pos(noiseAON) && pos(noisePG) && pos(noiseOB)
-                && pos(wOB_inter[0]) //  && neg(wOB_inter[1]) <- ??? why is this one positive??
+                && pos(wOB_inter[0]) && neg(wOB_inter[1])
                 && wOB_unitConfig.checkWeights() && wAON_unitConfig.checkWeights() && wPC_unitConfig.checkWeights();
         }
     private:

@@ -15,11 +15,40 @@ void ActivationHistory::put(numeric newValue) {
         doMonitoring(newValue);
     history.pop_front();
     history.push_back(newValue);
+    numPuts++;
+}
+
+std::size_t ActivationHistory::getNumPutsMade() const noexcept {
+    return numPuts;
+}
+
+ActivationHistory::Slice::Slice(
+    const ActivationHistory& history,
+    std::size_t numPuts,
+    std::size_t start,
+    std::size_t length
+) : fullHistory(history), creationNumPuts(numPuts), offsetStart(start), length(length) {}
+
+bool ActivationHistory::Slice::isValid() const noexcept {
+    return transformIndex(length - 1) < fullHistory.size();
+}
+
+numeric ActivationHistory::Slice::get(std::size_t offset) const {
+    std::size_t fullOffset = transformIndex(offset);
+    return fullHistory.get(fullOffset);
+}
+
+std::size_t ActivationHistory::Slice::transformIndex(std::size_t sliceIndex) const noexcept {
+    return offsetStart + (fullHistory.getNumPutsMade() - creationNumPuts) + sliceIndex;
 }
 
 numeric ActivationHistory::get(std::size_t offset) const {
     std::size_t index = history.size() - offset - 1;
     return history.at(index);
+}
+
+std::size_t ActivationHistory::size() const noexcept {
+    return history.size();
 }
 
 void ActivationHistory::resize(std::size_t newSize) {

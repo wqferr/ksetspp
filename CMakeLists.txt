@@ -5,10 +5,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_compile_definitions(DEBUG)
 add_compile_options(-g)
-add_executable(
-    main
-    src/main.cpp
-)
+
 add_library(
     ksets
     src/ksets/activationhistory.cpp
@@ -18,8 +15,19 @@ add_library(
     src/ksets/k2layer.cpp
     src/ksets/k3.cpp
 )
-target_link_libraries(main ksets)
 target_include_directories(ksets PUBLIC ./include)
+
+add_executable(
+    main
+    src/main.cpp
+)
+target_link_libraries(main ksets)
+
+add_executable(
+    testparam
+    src/testparam.cpp
+)
+target_link_libraries(testparam ksets)
 
 include(GNUInstallDirs)
 install(
