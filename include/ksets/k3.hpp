@@ -30,7 +30,7 @@ namespace ksets {
 
         /// Weight between the periglomerular cells (PG, the input K0 array) and the
         /// excitatory K0 in the olfactory bulb (OB, layer 1 of K2 sets). Must be positive.
-        numeric wPG_OB = 0.30;
+        numeric wPG_OB = 0.779;
 
         /// Delay for wPG_OB connection. See wPG_OB for more information.
         std::size_t dPG_OB = 0;
@@ -38,7 +38,7 @@ namespace ksets {
         /// Weight of the lateral olfactory tract (LOT) between the olfactory bulb (OB, layer 1 of K2 sets)
         /// and the anterior olfactory nucleus (AON, layer 2). It connects all primary K0 in OB to the single
         /// primary K0 in AON. Must be positive.
-        numeric wOB_AON_lot = 0.15;
+        numeric wOB_AON_lot = 0.600;
 
         /// Delay for wOB_AON_lot connection. See wOB_AON_lot for more information.
         std::size_t dOB_AON_lot = 0;
@@ -46,7 +46,7 @@ namespace ksets {
         /// Weight of the lateral olfactory tract (LOT) between the olfactory bulb (OB, layer 1 of K2 sets)
         /// and the prepiriform cortex (PC, layer 3 of K2 sets). It connects all primary K0 in OB to the single
         /// primary K0 in PC. Must be positive.
-        numeric wOB_PC_lot = 0.60;
+        numeric wOB_PC_lot = 3.800;
 
         /// Delay for wOB_PC_lot. See wOB_PC_lot for more information.
         std::size_t dOB_PC_lot = 0;
@@ -77,23 +77,20 @@ namespace ksets {
 
         /// Weight between the prepiriform cortex (PC, layer 3 of K2 sets) and the deep pyramid cells (DPC,
         /// <unknown function>). Must be negative.
-        numeric wPC_DPC = -0.25;
+        numeric wPC_DPC = -0.900;
 
         /// Delay for wPC_DPC. See wPC_DPC for more information.
         std::size_t dPC_DPC = 0;
 
         /// Weight between the deep pyramid cells (DPC, <unknown function>) back to the prepiriform cortex
-        /// (PC, layer 3 of K2 sets). Must be positive. THIS DEFAULT VALUE IS A GUESS! I DON'T KNOW THE ACTUAL VALUES
-        /// OF THIS WEIGHT OR DELAY WITHOUT ACCESS TO THE ARTICLE.
-        numeric wDPC_PC = 0.20;
+        /// (PC, layer 3 of K2 sets). Must be positive.
+        numeric wDPC_PC = 1.6;
 
         /// Delay for wDPC_PC. See wDPC_PC for more information.
         std::size_t dDPC_PC = 0;
 
         /// Weight between the deep pyramid cells (DPC, <unknown function>) and the olfactory bulb (OB, layer 1
         /// of K2 sets). It connects the single K0 set of DPC to all antipodal K0 sets in OB. Must be positive.
-        /// THIS DEFAULT VALUE IS A GUESS! I DON'T KNOW THE ACTUAL VALUES OF THIS WEIGHT OR DELAY WITHOUT
-        /// ACCESS TO THE ARTICLE.
         numeric wDPC_OB_toAntipodal = 0.240;
 
         /// Delay for wDPC_OB_toAntipodal. See wDPC_OB_toAntipodal for more information. This is marked as D4
@@ -124,7 +121,7 @@ namespace ksets {
 
         /// Inter unit weights between each pair of K2 sets in the olfactory bulb (OB, layer 1 of K2 sets).
         /// These values will be divided by n-1, where n is the number of units in OB. See K2Layer for more information.
-        std::array<numeric, 2> wOB_inter = {0.300, -0.300};
+        std::array<numeric, 2> wOB_inter = {0.300, 1.000};
 
         /// Standard deviation of the gaussian RNG used to perturb the lateral weights between the primary
         /// nodes of each of the units in the olfactory bulb (OB, layer 1 of K2 sets). These values will be divided
@@ -142,17 +139,17 @@ namespace ksets {
         // TODO: switch these numbers to length in milliseconds
         /// Length of history tracking for output nodes (primary and antipodal nodes of the olfactory bulb,
         /// layer 1 of K2 sets).
-        std::size_t outputHistorySize = 5'000;
+        std::size_t outputHistorySize = odeMillisecondsToIters(4'000);
 
         /// Number of latest iterations for which output nodes (primary and antipodal nodes of the olfactory bulb,
         /// layer 1 of K2 sets) variance and standard deviation will be tracked.
-        std::size_t outputActivityMonitoring = 300;
+        std::size_t outputActivityMonitoring = odeMillisecondsToIters(300);
 
         /// Length of history tracking for non-output nodes. See outputHistorySize for more information.
-        std::size_t nonOutputHistorySize = 400;
+        std::size_t nonOutputHistorySize = odeMillisecondsToIters(500);
 
         /// Standard deviation of the gaussian RNG used to initialize all K0 in the K3 set.
-        numeric noiseInitialK0StateRandomization = 0.2;
+        numeric noiseInitialK0States = 0.2;
 
         /// Number of RNG seeds to be created in a batch.
         std::size_t rngSeedGenBatchSize = 32;
@@ -168,6 +165,7 @@ namespace ksets {
                 && pos(wAON_PG_mot) && pos(wAON_OB_toAntipodal) && pos(wPC_AON_toAntipodal)
                 && neg(wPC_DPC) && pos(wDPC_PC) && pos(wDPC_OB_toAntipodal)
                 && pos(noiseAON) && pos(noisePG) && pos(noiseOB)
+                && pos(wOB_inter[0]) //  && neg(wOB_inter[1]) <- ??? why is this one positive??
                 && wOB_unitConfig.checkWeights() && wAON_unitConfig.checkWeights() && wPC_unitConfig.checkWeights();
         }
     private:

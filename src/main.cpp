@@ -41,7 +41,7 @@ int main(void) {
 
     std::vector<ksets::numeric> pattern(numUnits, 0);
     pattern[0] = 1;
-    model.present(1500, pattern.begin(), pattern.end());
+    // model.present(1500, pattern.begin(), pattern.end());
     model.rest(200);
 
     std::size_t fileHistSize = ksets::odeMillisecondsToIters(2000);

@@ -74,7 +74,6 @@ K3::K3(std::size_t olfactoryBulbNumUnits, numeric initialRestMilliseconds, std::
     connectAllSubcomponents(config);
     perturbObPrimaryLateralWeights(olfactoryBulbNumUnits, config, seedGen);
 
-    // auto initRng = createGaussianRng(config.noiseInitialK0StateRandomization, seedGen());
     randomizeK0States(config, seedGen);
     setupInputAndAonNoise(config, seedGen);
 
@@ -99,7 +98,7 @@ K3::K3(std::size_t olfactoryBulbNumUnits, numeric initialRestMilliseconds, ksets
     ) {}
 
 void K3::randomizeK0States(const K3Config& config, std::function<ksets::rngseed()>& seedGen) noexcept {
-    auto rng = createGaussianRng(config.noiseInitialK0StateRandomization, seedGen());
+    auto rng = createGaussianRng(config.noiseInitialK0States, seedGen());
     for (auto& pgUnit : periglomerularCells)
         pgUnit.randomizeK0States(rng);
     olfactoryBulb.randomizeK0States(rng);
