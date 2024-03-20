@@ -25,7 +25,7 @@ target_link_libraries(main ksets)
 
 add_executable(
     testparam
-    src/testparam.cpp
+    src/paramsearch/testparam.cpp
 )
 target_link_libraries(testparam ksets)
 
