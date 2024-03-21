@@ -6,7 +6,9 @@ using ksets::K3Config, ksets::K3, ksets::K0, ksets::numeric, ksets::rngseed;
 constexpr int NUM_UNITS = 5;
 constexpr numeric INITIAL_REST = 500;
 constexpr rngseed SEED = 1997'12'02;
-constexpr int PROCEDURE_DURATION_MS = 5'000;
+constexpr int PROCEDURE_N_STEPS = 5;
+constexpr int STEP_DURATION_MS = 500;
+constexpr int PROCEDURE_DURATION_MS = PROCEDURE_N_STEPS * STEP_DURATION_MS;
 // END CONFIG
 
 constexpr int PROCEDURE_DURATION_ITERS = ksets::odeMillisecondsToIters(PROCEDURE_DURATION_MS);
@@ -63,7 +65,7 @@ K3Config parseArgs(int argc, char *argv[]) {
 
     K3Config config;
     config.outputActivityMonitoring = 0;
-    config.outputHistorySize = PROCEDURE_DURATION_MS;
+    config.outputHistorySize = PROCEDURE_DURATION_ITERS;
 
     config.wOB_AON_lot = strtof(argv[W_OB_AON], &errptr);
     assertm(!*errptr, "Invalid wOB_AON");
@@ -101,26 +103,24 @@ K3Config parseArgs(int argc, char *argv[]) {
 }
 
 void doSimulation(K3& model) {
-    // STEP 1: rest for 1000ms
-    model.rest(1'000);
+    // STEP 1: rest
+    model.rest(STEP_DURATION_MS);
 
     // STEP 2: present 1 in the first unit, 0 in the rest
     std::vector<numeric> pattern(NUM_UNITS, 0);
     pattern[0] = 1;
-    model.present(1'000, pattern.begin(), pattern.end());
+    model.present(STEP_DURATION_MS, pattern.begin(), pattern.end());
 
-    // STEP 3: rest for 1000ms
-    model.rest(1'000);
+    // STEP 3: rest
+    model.rest(STEP_DURATION_MS);
 
     // STEP 4: present 1 in the last unit, 0 in the rest
     pattern[0] = 0;
     pattern[NUM_UNITS-1] = 1;
-    model.present(1'000, pattern.begin(), pattern.end());
+    model.present(STEP_DURATION_MS, pattern.begin(), pattern.end());
 
-    // STEP 5: rest for 1000ms
-    model.rest(1'000);
-
-    // TOTAL PROCEDURE DURATION: 5000ms
+    // STEP 5: rest
+    model.rest(STEP_DURATION_MS);
 }
 
 void writeCsv(const ksets::ActivationHistory& history) {
