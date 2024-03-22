@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 # must be executed from this folder, not project root
+import json
 from sklearn.model_selection import GridSearchCV
 from sklearn.base import BaseEstimator
 import code
@@ -190,21 +191,24 @@ def main():
         model,
         param_grid={
             "wOB_AON": np.arange(1, 8, 0.5),
-            "wOB_PC": np.arange(1, 8, 0.5),
-            "wAON_OB": np.arange(1, 8, 0.5),
-            "wAON_PG": np.arange(1, 8, 0.5),
-            "wPC_AON": np.arange(1, 8, 0.5),
-            "wDPC_OB": np.arange(1, 8, 0.5),
-            "wDPC_PC": np.arange(1, 8, 0.5),
-            "wPC_DPC": np.arange(-1, -5, -0.5),
-            "wOB_LAT_E": np.arange(1, 8, 0.5),
-            "wOB_LAT_I": np.arange(-1, -5, -0.5)
+            # "wOB_PC": np.arange(1, 8, 0.5),
+            # "wAON_OB": np.arange(1, 8, 0.5),
+            # "wAON_PG": np.arange(1, 8, 0.5),
+            # "wPC_AON": np.arange(1, 8, 0.5),
+            # "wDPC_OB": np.arange(1, 8, 0.5),
+            # "wDPC_PC": np.arange(1, 8, 0.5),
+            # "wPC_DPC": np.arange(-1, -5, -0.5),
+            # "wOB_LAT_E": np.arange(1, 8, 0.5),
+            # "wOB_LAT_I": np.arange(-1, -5, -0.5)
         },
         n_jobs=4,
         verbose=2,
         cv=2
     )
     gs.fit(np.zeros((2, 1)), np.zeros((2, 1)))
+    print(gs.best_params_)
+    with open("GRIDSEARCH_RESULTS.txt", "w+") as f:
+        f.write(json.dumps(gs.best_params_))
     code.interact(local=locals())
 
 
