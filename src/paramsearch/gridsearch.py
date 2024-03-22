@@ -185,6 +185,7 @@ class K3Model(BaseEstimator):
             self.cached_score = self.calc_score()
         return self.cached_score
 
+# this is going to take 71 MILLION HOURS to run, this is a dead end
 def main():
     model = K3Model()
     gs = GridSearchCV(
